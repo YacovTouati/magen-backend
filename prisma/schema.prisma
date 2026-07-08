@@ -1,0 +1,24 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"    
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model CallReport {
+  id                         Int      @id @default(autoincrement())
+  callDuration               Int
+  callerType                 String
+  callPurpose                String
+  summaryNotes               String
+  callerName                 String
+  phone                      String
+  email                      String?
+  region                     String
+  gender                     String
+  sector                     String
+  contactedOtherCenterBefore Boolean
+  createdAt                  DateTime @default(now())
+}
