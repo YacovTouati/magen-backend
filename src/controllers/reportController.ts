@@ -8,7 +8,8 @@ export const createCallReport = async (req: Request, res: Response) => {
         // חילוץ כל השדות הישנים והחדשים שעברו את ה-Validator בהצלחה
         const {
             callDuration, callerType, callPurpose, summaryNotes,
-            callerName, phone, email, region, gender, sector, contactedOtherCenterBefore
+            callerName, phone, email, region, gender, sector, contactedOtherCenterBefore,
+            reportingDuty
         } = req.body;
 
         // העברת האובייקט המלא לשכבת הלוגיקה (Service)
@@ -24,6 +25,7 @@ export const createCallReport = async (req: Request, res: Response) => {
             gender,
             sector,
             contactedOtherCenterBefore
+            , reportingDuty
         });
 
         return res.status(201).json({

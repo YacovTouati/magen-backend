@@ -1,14 +1,61 @@
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"    
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "sqlite"
 }
 
+enum UserRole {
+  ADMIN
+  VOLUNTEER
+}
+
+model User {
+  id              Int       @id @default(autoincrement())
+  email           String    @unique
+  password        String
+  name            String
+  role            UserRole  @default(VOLUNTEER)
+  reports         CallReport[]
+  assignedIntakes Intake[]
+  createdAt       DateTime  @default(now())
+}
+
+enum IntakeUrgency {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum IntakeStatus {
+  NEW
+  NO_ANSWER
+  ACTIVE
+  CLOSED
+  LONG_TERM
+}
+
+model Intake {
+  id                   Int           @id @default(autoincrement())
+  callerName           String
+  phone                String
+  contactedOtherCenter String
+  caseDescription      String
+  urgency              IntakeUrgency
+  status               IntakeStatus  @default(NEW)
+
+  assignedToId         Int?
+  assignedTo           User?         @relation(fields: [assignedToId], references: [id])
+
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+}
+
 model CallReport {
-  id                         Int      @id @default(autoincrement())
+  id                         Int       @id @default(autoincrement())
   callDuration               Int
   callerType                 String
   callPurpose                String
@@ -20,5 +67,9 @@ model CallReport {
   gender                     String
   sector                     String
   contactedOtherCenterBefore Boolean
-  createdAt                  DateTime @default(now())
+  reportingDuty              Boolean?
+  createdAt                  DateTime  @default(now())
+
+  createdById                Int?
+  createdBy                  User?     @relation(fields: [createdById], references: [id])
 }

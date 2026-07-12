@@ -3,7 +3,10 @@ import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { validateCallReport } from './middlewares/validators';
+import { authRouter } from './routes/authRoutes';
+import { intakeRouter } from './routes/intakeRoutes';
 import { reportRouter } from './routes/reportRoutes';
+import { userRouter } from './routes/userRoutes';
 
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
@@ -12,7 +15,7 @@ const PORT = process.env.PORT || 3000;
 app.use(helmet());
 app.use(cors({
     origin: 'http://localhost:4200', // מאפשר לאנגולר שלך גישה
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
@@ -26,7 +29,10 @@ app.get('/health', (req: Request, res: Response) => {
 });
 
 // Mount API routers under /api
+app.use('/api', authRouter);
+app.use('/api', intakeRouter);
 app.use('/api', reportRouter);
+app.use('/api', userRouter);
 
 app.listen(PORT, () => {
     console.log(`⚡ [Magen Backend]: השרת רץ בצורה מאובטחת על http://localhost:${PORT}`);

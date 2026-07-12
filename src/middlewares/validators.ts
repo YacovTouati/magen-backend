@@ -1,6 +1,18 @@
 import { body, validationResult } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
 
+// פונקציית ניתוח תוצאות בדיקה משותפת
+const handleValidationErrors = (req: Request, res: Response, next: NextFunction) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      errors: errors.array().map(err => ({ field: (err as any).path, message: err.msg }))
+    });
+  }
+  next();
+};
+
 // 🛡️ חוקי אימות קשיחים ומורחבים לטופס דיווח שיחה החדש
 export const validateCallReport = [
   // שדות קודמים
@@ -47,16 +59,48 @@ export const validateCallReport = [
   body('contactedOtherCenterBefore')
     .isBoolean().withMessage('השדה האם פנה בעבר למרכז אחר חייב להיות כן או לא (בוליאני)'),
 
-  // פונקציית ניתוח תוצאות הבדיקה
-  (req: Request, res: Response, next: NextFunction) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      // חסימה מיידית במידה ויש שדות לא תקינים
-      return res.status(400).json({
-        success: false,
-        errors: errors.array().map(err => ({ field: (err as any).path, message: err.msg }))
-      });
-    }
-    next();
-  }
+  handleValidationErrors
+];
+
+// 🛡️ חוקי אימות ליצירת משתמש חדש
+export const validateCreateUser = [
+  body('email')
+    .trim()
+    .notEmpty().withMessage('חובה להזין כתובת מייל')
+    .isEmail().withMessage('כתובת המייל שהוזנה אינה תקינה')
+    .normalizeEmail(),
+
+  body('password')
+    .isLength({ min: 8 }).withMessage('הסיסמה חייבת להכיל לפחות 8 תווים'),
+
+  body('name')
+    .trim()
+    .notEmpty().withMessage('חובה להזין שם'),
+
+  body('role')
+    .isIn(['ADMIN', 'VOLUNTEER']).withMessage('תפקיד המשתמש אינו תקין'),
+
+  handleValidationErrors
+];
+
+// 🛡️ חוקי אימות לכניסת משתמש (login)
+export const validateLogin = [
+  body('email')
+    .trim()
+    .notEmpty().withMessage('חובה להזין כתובת מייל')
+    .isEmail().withMessage('כתובת המייל שהוזנה אינה תקינה')
+    .normalizeEmail(),
+
+  body('password')
+    .notEmpty().withMessage('חובה להזין סיסמה'),
+
+  handleValidationErrors
+];
+
+// 🛡️ חוקי אימות לעדכון סטטוס תיק (Intake)
+export const validateUpdateIntakeStatus = [
+  body('status')
+    .isIn(['NEW', 'NO_ANSWER', 'ACTIVE', 'CLOSED', 'LONG_TERM']).withMessage('סטטוס אינו תקין'),
+
+  handleValidationErrors
 ];

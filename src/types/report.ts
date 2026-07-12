@@ -16,4 +16,5 @@ export interface CallReport {
     gender: Gender;
     sector: Sector;
     contactedOtherCenterBefore: boolean;
+    reportingDuty?: boolean;
 }
