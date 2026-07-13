@@ -30,6 +30,24 @@ export const getIntakes = async (req: Request, res: Response) => {
     }
 };
 
+export const createIntake = async (req: Request, res: Response) => {
+    try {
+        const { callerName, phone, contactedOtherCenter, caseDescription, urgency, status, assignedToId } = req.body;
+        const intake = await intakeService.create({
+            callerName,
+            phone,
+            contactedOtherCenter,
+            caseDescription,
+            urgency,
+            status,
+            assignedToId: assignedToId ?? null,
+        });
+        return res.status(201).json({ success: true, data: intake });
+    } catch (error) {
+        return handleError(res, error);
+    }
+};
+
 export const claimIntake = async (req: Request, res: Response) => {
     const id = parseIntakeId(req, res);
     if (id === null) return;

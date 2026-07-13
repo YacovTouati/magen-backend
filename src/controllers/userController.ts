@@ -20,7 +20,14 @@ export const getUsers = async (req: Request, res: Response) => {
 
 export const createUser = async (req: Request, res: Response) => {
     try {
-        const payload: CreateUserPayload = req.body;
+        // בונים אובייקט מפורש עם שדות מורשים בלבד — לא מעבירים את req.body כמות שהוא,
+        // כדי שלקוח לא יוכל להזריק שדות נוספים (כמו id/createdAt) ישירות ל-Prisma
+        const payload: CreateUserPayload = {
+            email: req.body.email,
+            password: req.body.password,
+            name: req.body.name,
+            role: req.body.role,
+        };
         const user = await userService.createUser(payload);
         return res.status(201).json({ success: true, data: user });
     } catch (error) {

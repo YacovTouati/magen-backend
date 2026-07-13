@@ -1,12 +1,32 @@
+import { Prisma } from '../generated/prisma/client';
 import { HttpError } from '../errors/httpError';
 import { IntakeRepository } from '../repositories/intakeRepository';
-import { IntakeStatus } from '../types/intake';
+import { CreateIntakePayload, IntakeStatus } from '../types/intake';
 
 export class IntakeService {
     private intakeRepository = new IntakeRepository();
 
     async getAllIntakes() {
         return this.intakeRepository.findAllWithAssignee();
+    }
+
+    async create(payload: CreateIntakePayload) {
+        try {
+            return await this.intakeRepository.create({
+                callerName: payload.callerName,
+                phone: payload.phone,
+                contactedOtherCenter: payload.contactedOtherCenter,
+                caseDescription: payload.caseDescription,
+                urgency: payload.urgency,
+                status: payload.status ?? 'NEW',
+                assignedToId: payload.assignedToId ?? null,
+            });
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+                throw new HttpError(400, 'המטפל שצוין אינו קיים במערכת');
+            }
+            throw error;
+        }
     }
 
     async claim(id: number, currentUserId: number) {

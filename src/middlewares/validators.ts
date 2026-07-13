@@ -104,3 +104,35 @@ export const validateUpdateIntakeStatus = [
 
   handleValidationErrors
 ];
+
+// 🛡️ חוקי אימות ליצירת תיק (Intake) ידנית על ידי מנהל
+export const validateCreateIntake = [
+  body('callerName')
+    .trim()
+    .notEmpty().withMessage('חובה להזין שם פונה'),
+
+  body('phone')
+    .trim()
+    .notEmpty().withMessage('חובה להזין מספר טלפון'),
+
+  body('contactedOtherCenter')
+    .trim()
+    .notEmpty().withMessage('חובה לציין האם הפונה פנה למרכז אחר'),
+
+  body('caseDescription')
+    .trim()
+    .isLength({ min: 5, max: 5000 }).withMessage('תיאור המקרה חייב להכיל בין 5 ל-5000 תווים'),
+
+  body('urgency')
+    .isIn(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']).withMessage('רמת הדחיפות אינה תקינה'),
+
+  body('status')
+    .optional()
+    .isIn(['NEW', 'NO_ANSWER', 'ACTIVE', 'CLOSED', 'LONG_TERM']).withMessage('סטטוס אינו תקין'),
+
+  body('assignedToId')
+    .optional({ nullable: true })
+    .isInt({ min: 1 }).withMessage('מזהה המטפל המשויך אינו תקין'),
+
+  handleValidationErrors
+];

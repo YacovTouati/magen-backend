@@ -1,5 +1,5 @@
 import prisma from '../db/prisma';
-import { IntakeStatus } from '../types/intake';
+import { IntakeStatus, IntakeUrgency } from '../types/intake';
 
 const assignedToSelect = {
     id: true,
@@ -8,10 +8,27 @@ const assignedToSelect = {
     role: true,
 } as const;
 
+interface CreateIntakeData {
+    callerName: string;
+    phone: string;
+    contactedOtherCenter: string;
+    caseDescription: string;
+    urgency: IntakeUrgency;
+    status: IntakeStatus;
+    assignedToId: number | null;
+}
+
 export class IntakeRepository {
+    async create(data: CreateIntakeData) {
+        return prisma.intake.create({
+            data,
+            include: { assignedTo: { select: assignedToSelect }, callReport: true },
+        });
+    }
+
     async findAllWithAssignee() {
         return prisma.intake.findMany({
-            include: { assignedTo: { select: assignedToSelect } },
+            include: { assignedTo: { select: assignedToSelect }, callReport: true },
             orderBy: { createdAt: 'desc' },
         });
     }
@@ -19,7 +36,7 @@ export class IntakeRepository {
     async findById(id: number) {
         return prisma.intake.findUnique({
             where: { id },
-            include: { assignedTo: { select: assignedToSelect } },
+            include: { assignedTo: { select: assignedToSelect }, callReport: true },
         });
     }
 

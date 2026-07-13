@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { HttpError } from '../errors/httpError';
 import { UserRepository } from '../repositories/userRepository';
 import { LoginPayload, AuthTokenPayload } from '../types/auth';
 
@@ -16,12 +17,12 @@ export class AuthService {
     async login(payload: LoginPayload) {
         const user = await this.userRepository.findByEmail(payload.email);
         if (!user) {
-            throw new Error('אימייל או סיסמה שגויים');
+            throw new HttpError(401, 'אימייל או סיסמה שגויים');
         }
 
         const passwordMatches = await bcrypt.compare(payload.password, user.password);
         if (!passwordMatches) {
-            throw new Error('אימייל או סיסמה שגויים');
+            throw new HttpError(401, 'אימייל או סיסמה שגויים');
         }
 
         const tokenPayload: AuthTokenPayload = {

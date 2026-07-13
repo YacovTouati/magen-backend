@@ -50,8 +50,15 @@ model Intake {
   assignedToId         Int?
   assignedTo           User?         @relation(fields: [assignedToId], references: [id])
 
+  callReportId         Int?          @unique
+  callReport           CallReport?   @relation(fields: [callReportId], references: [id])
+
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
+
+  @@index([assignedToId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model CallReport {
@@ -72,4 +79,9 @@ model CallReport {
 
   createdById                Int?
   createdBy                  User?     @relation(fields: [createdById], references: [id])
+
+  intake                     Intake?
+
+  @@index([createdById])
+  @@index([createdAt])
 }

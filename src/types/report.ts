@@ -17,4 +17,5 @@ export interface CallReport {
     sector: Sector;
     contactedOtherCenterBefore: boolean;
     reportingDuty?: boolean;
+    createdById?: number | null;
 }

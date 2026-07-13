@@ -13,7 +13,7 @@ export const createCallReport = async (req: Request, res: Response) => {
         } = req.body;
 
         // העברת האובייקט המלא לשכבת הלוגיקה (Service)
-        const savedReport = await reportService.processAndSaveReport({
+        const { report, intake } = await reportService.processAndSaveReport({
             callDuration,
             callerType,
             callPurpose,
@@ -24,14 +24,15 @@ export const createCallReport = async (req: Request, res: Response) => {
             region,
             gender,
             sector,
-            contactedOtherCenterBefore
-            , reportingDuty
+            contactedOtherCenterBefore,
+            reportingDuty,
+            createdById: req.user!.id
         });
 
         return res.status(201).json({
             success: true,
-            message: 'הדיווח המורחב עבר ולידציה מלאה ונשמר בהצלחה',
-            data: savedReport
+            message: 'הדיווח המורחב עבר ולידציה מלאה ונשמר בהצלחה, ותיק חדש נפתח לטיפול',
+            data: { report, intake }
         });
 
     } catch (error) {
