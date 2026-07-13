@@ -1,6 +1,10 @@
 import { body, validationResult } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
 
+// מספר טלפון: ספרות בלבד, עד 10 תווים (למשל 0501234567)
+const PHONE_PATTERN = /^\d{1,10}$/;
+const PHONE_INVALID_MESSAGE = 'מספר הטלפון אינו תקין (מקסימום 10 ספרות)';
+
 // פונקציית ניתוח תוצאות בדיקה משותפת
 const handleValidationErrors = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
@@ -37,7 +41,8 @@ export const validateCallReport = [
   body('phone')
     .trim()
     .notEmpty().withMessage('חובה להזין מספר טלפון')
-    .isMobilePhone('any').withMessage('מספר הטלפון שהוזן אינו תקין'),
+    .bail()
+    .matches(PHONE_PATTERN).withMessage(PHONE_INVALID_MESSAGE),
 
   body('email')
     .trim()
@@ -113,7 +118,9 @@ export const validateCreateIntake = [
 
   body('phone')
     .trim()
-    .notEmpty().withMessage('חובה להזין מספר טלפון'),
+    .notEmpty().withMessage('חובה להזין מספר טלפון')
+    .bail()
+    .matches(PHONE_PATTERN).withMessage(PHONE_INVALID_MESSAGE),
 
   body('contactedOtherCenter')
     .trim()
@@ -133,6 +140,17 @@ export const validateCreateIntake = [
   body('assignedToId')
     .optional({ nullable: true })
     .isInt({ min: 1 }).withMessage('מזהה המטפל המשויך אינו תקין'),
+
+  handleValidationErrors
+];
+
+// 🛡️ חוקי אימות לשיבוץ מתנדב ליום ביומן
+export const validateUpsertAssignment = [
+  body('date')
+    .isISO8601().withMessage('תאריך אינו תקין (נדרש פורמט YYYY-MM-DD)'),
+
+  body('volunteerId')
+    .isInt({ min: 1 }).withMessage('מזהה המתנדב אינו תקין'),
 
   handleValidationErrors
 ];
