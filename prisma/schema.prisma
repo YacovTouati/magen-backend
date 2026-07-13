@@ -13,14 +13,28 @@ enum UserRole {
 }
 
 model User {
-  id              Int       @id @default(autoincrement())
-  email           String    @unique
-  password        String
-  name            String
-  role            UserRole  @default(VOLUNTEER)
-  reports         CallReport[]
-  assignedIntakes Intake[]
-  createdAt       DateTime  @default(now())
+  id               Int               @id @default(autoincrement())
+  email            String            @unique
+  password         String
+  name             String
+  role             UserRole          @default(VOLUNTEER)
+  reports          CallReport[]
+  assignedIntakes  Intake[]
+  shiftAssignments ShiftAssignment[]
+  createdAt        DateTime          @default(now())
+}
+
+model ShiftAssignment {
+  id          Int      @id @default(autoincrement())
+  date        DateTime @unique
+
+  volunteerId Int
+  volunteer   User     @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([volunteerId])
 }
 
 enum IntakeUrgency {
