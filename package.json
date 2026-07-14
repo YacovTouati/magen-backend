@@ -36,6 +36,7 @@
     "express-rate-limit": "^8.5.2",
     "express-validator": "^7.3.2",
     "helmet": "^8.2.0",
+    "jsforce": "^3.10.19",
     "jsonwebtoken": "^9.0.3"
   }
 }

@@ -3,6 +3,25 @@ generator client {
   output   = "../src/generated/prisma"
 }
 
+// ⚠️ PRODUCTION CUTOVER NOTE (SQLite -> Postgres):
+// Prisma requires `provider` to be a static literal — it cannot be driven by an
+// env var, and SQLite/Postgres are different SQL dialects, so this schema (and
+// every file in prisma/migrations/) can only target ONE provider at a time.
+// There is no safe way to make this toggle at runtime.
+//
+// When ready to cut over:
+//   1. Stand up a local Postgres for dev (docker compose is simplest) so
+//      dev/prod stay on the same dialect — do NOT try to keep SQLite for
+//      local dev after this point, migrations will silently diverge.
+//   2. Change `provider` below to "postgresql".
+//   3. Swap the adapter in src/db/prisma.ts: `@prisma/adapter-better-sqlite3`
+//      -> `@prisma/adapter-pg` (or drop the adapter entirely and use the
+//      default PrismaClient, which speaks Postgres natively).
+//   4. Archive prisma/migrations/* (it's SQLite-dialect SQL, inapplicable to
+//      Postgres) and run `prisma migrate dev --name init` fresh against the
+//      empty Postgres database to generate a new baseline migration.
+//   5. Update DATABASE_URL — see .env for the production connection string
+//      parameters (sslmode, connection_limit, pool_timeout, pgbouncer).
 datasource db {
   provider = "sqlite"
 }
