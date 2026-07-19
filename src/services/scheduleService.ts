@@ -79,4 +79,22 @@ export class ScheduleService {
         }
         return this.scheduleRepository.findShiftById(shiftId);
     }
+
+    // Bypasses the OPEN-only guard entirely — admin can assign a free shift or
+    // overwrite one already claimed by another volunteer. P2003 means the FK
+    // target (volunteerId) doesn't exist; anything else is genuinely unexpected.
+    async adminAssign(shiftId: number, volunteerId: number) {
+        try {
+            const result = await this.scheduleRepository.adminAssignShift(shiftId, volunteerId);
+            if (result.count === 0) {
+                throw new HttpError(404, 'משמרת לא נמצאה');
+            }
+            return this.scheduleRepository.findShiftById(shiftId);
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+                throw new HttpError(400, 'מתנדב לא נמצא');
+            }
+            throw error;
+        }
+    }
 }

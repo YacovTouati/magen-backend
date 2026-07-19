@@ -176,3 +176,11 @@ export const validateScheduleLookup = [
 
   handleValidationErrors
 ];
+
+// 🛡️ חוקי אימות לשיבוץ מתנדב למשמרת על ידי מנהל
+export const validateAdminAssignShift = [
+  body('volunteerId')
+    .isInt({ min: 1 }).withMessage('מזהה המתנדב אינו תקין'),
+
+  handleValidationErrors
+];

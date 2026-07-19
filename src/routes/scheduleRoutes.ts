@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {
+    adminAssignShift,
     adminReleaseShift,
     claimShift,
     createSchedule,
@@ -8,7 +9,11 @@ import {
     publishSchedule,
 } from '../controllers/scheduleController';
 import { authenticate, checkRole } from '../middlewares/auth';
-import { validateCreateSchedule, validateScheduleLookup } from '../middlewares/validators';
+import {
+    validateAdminAssignShift,
+    validateCreateSchedule,
+    validateScheduleLookup,
+} from '../middlewares/validators';
 
 export const scheduleRouter = Router();
 
@@ -30,3 +35,12 @@ scheduleRouter.post('/shifts/:id/claim', claimShift);
 
 // Admin-only escape hatch — the single path that can move a shift out of LOCKED.
 scheduleRouter.post('/shifts/:id/admin-release', checkRole('ADMIN'), adminReleaseShift);
+
+// Admin-only escape hatch — assigns/overwrites a shift directly, bypassing the
+// OPEN-only guard that claimShiftIfAvailable enforces for volunteers.
+scheduleRouter.post(
+    '/shifts/:id/admin-assign',
+    checkRole('ADMIN'),
+    validateAdminAssignShift,
+    adminAssignShift
+);

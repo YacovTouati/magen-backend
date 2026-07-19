@@ -99,4 +99,19 @@ export class ScheduleRepository {
             data: { status: 'OPEN', volunteerId: null, lockedAt: null },
         });
     }
+
+    // Atomic: admin-only escape hatch, deliberately unconditional on status —
+    // unlike claimShiftIfAvailable this can grab an OPEN shift or overwrite one
+    // already LOCKED by someone else. The only reason this can affect 0 rows is
+    // the shift not existing at all.
+    async adminAssignShift(shiftId: number, volunteerId: number) {
+        return prisma.shift.updateMany({
+            where: { id: shiftId },
+            data: {
+                status: 'LOCKED',
+                volunteerId,
+                lockedAt: new Date(),
+            },
+        });
+    }
 }

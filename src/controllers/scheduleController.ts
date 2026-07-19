@@ -94,3 +94,15 @@ export const adminReleaseShift = async (req: Request, res: Response) => {
         return handleError(res, error);
     }
 };
+
+export const adminAssignShift = async (req: Request, res: Response) => {
+    const id = parseShiftId(req, res);
+    if (id === null) return;
+    try {
+        const { volunteerId } = req.body;
+        const shift = await scheduleService.adminAssign(id, Number(volunteerId));
+        return res.status(200).json({ success: true, data: shift });
+    } catch (error) {
+        return handleError(res, error);
+    }
+};
