@@ -154,3 +154,14 @@ export const validateUpsertAssignment = [
 
   handleValidationErrors
 ];
+
+// 🛡️ חוקי אימות ליצירת לוח משמרות חודשי
+export const validateCreateSchedule = [
+  body('month')
+    .isInt({ min: 1, max: 12 }).withMessage('חודש אינו תקין (נדרש ערך בין 1 ל-12)'),
+
+  body('year')
+    .isInt({ min: 2020, max: 2100 }).withMessage('שנה אינה תקינה'),
+
+  handleValidationErrors
+];

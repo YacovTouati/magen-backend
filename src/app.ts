@@ -7,6 +7,7 @@ import { assignmentRouter } from './routes/assignmentRoutes';
 import { authRouter } from './routes/authRoutes';
 import { intakeRouter } from './routes/intakeRoutes';
 import { reportRouter } from './routes/reportRoutes';
+import { scheduleRouter } from './routes/scheduleRoutes';
 import { userRouter } from './routes/userRoutes';
 import { generalApiLimiter } from './middlewares/rateLimiters';
 import { globalErrorHandler, notFoundHandler } from './middlewares/errorHandler';
@@ -39,6 +40,7 @@ app.use('/api', assignmentRouter);
 app.use('/api', authRouter);
 app.use('/api', intakeRouter);
 app.use('/api', reportRouter);
+app.use('/api', scheduleRouter);
 app.use('/api', userRouter);
 
 // כל נתיב שלא נתפס — 404 מובנה, לא ה-HTML הדיפולטיבי של Express
