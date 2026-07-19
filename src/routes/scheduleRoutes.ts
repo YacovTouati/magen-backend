@@ -3,11 +3,12 @@ import {
     adminReleaseShift,
     claimShift,
     createSchedule,
+    getScheduleByMonthYear,
     getScheduleShifts,
     publishSchedule,
 } from '../controllers/scheduleController';
 import { authenticate, checkRole } from '../middlewares/auth';
-import { validateCreateSchedule } from '../middlewares/validators';
+import { validateCreateSchedule, validateScheduleLookup } from '../middlewares/validators';
 
 export const scheduleRouter = Router();
 
@@ -20,6 +21,7 @@ scheduleRouter.post('/schedules/:id/publish', checkRole('ADMIN'), publishSchedul
 
 // Any authenticated user (volunteer needs to see what's claimable) — read-only,
 // no role gate. Same open-read posture as GET /api/intakes and GET /api/assignments.
+scheduleRouter.get('/schedules', validateScheduleLookup, getScheduleByMonthYear);
 scheduleRouter.get('/schedules/:id/shifts', getScheduleShifts);
 
 // Any authenticated volunteer: claim an open shift. No unassign/edit route exists

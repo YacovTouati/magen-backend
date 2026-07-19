@@ -1,4 +1,4 @@
-import { body, validationResult } from 'express-validator';
+import { body, query, validationResult } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
 
 // מספר טלפון: ספרות בלבד, עד 10 תווים (למשל 0501234567)
@@ -161,6 +161,17 @@ export const validateCreateSchedule = [
     .isInt({ min: 1, max: 12 }).withMessage('חודש אינו תקין (נדרש ערך בין 1 ל-12)'),
 
   body('year')
+    .isInt({ min: 2020, max: 2100 }).withMessage('שנה אינה תקינה'),
+
+  handleValidationErrors
+];
+
+// 🛡️ חוקי אימות לחיפוש לוח משמרות לפי חודש ושנה
+export const validateScheduleLookup = [
+  query('month')
+    .isInt({ min: 1, max: 12 }).withMessage('חודש אינו תקין (נדרש ערך בין 1 ל-12)'),
+
+  query('year')
     .isInt({ min: 2020, max: 2100 }).withMessage('שנה אינה תקינה'),
 
   handleValidationErrors

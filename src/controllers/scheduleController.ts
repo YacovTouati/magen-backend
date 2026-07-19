@@ -40,6 +40,17 @@ export const createSchedule = async (req: Request, res: Response) => {
     }
 };
 
+export const getScheduleByMonthYear = async (req: Request, res: Response) => {
+    try {
+        const month = Number(req.query.month);
+        const year = Number(req.query.year);
+        const schedule = await scheduleService.getScheduleByMonthYear(month, year);
+        return res.status(200).json({ success: true, data: schedule });
+    } catch (error) {
+        return handleError(res, error);
+    }
+};
+
 export const getScheduleShifts = async (req: Request, res: Response) => {
     const id = parseScheduleId(req, res);
     if (id === null) return;

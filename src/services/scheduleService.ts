@@ -16,6 +16,17 @@ export class ScheduleService {
         }
     }
 
+    // 404, not a 200-with-null — matches getScheduleWithShifts and every other
+    // single-resource lookup in this codebase, so the frontend has one consistent
+    // "not found" shape to handle rather than a special case for this one endpoint.
+    async getScheduleByMonthYear(month: number, year: number) {
+        const schedule = await this.scheduleRepository.findByMonthAndYear(month, year);
+        if (!schedule) {
+            throw new HttpError(404, 'לוח משמרות לא נמצא לחודש ושנה אלו');
+        }
+        return schedule;
+    }
+
     async getScheduleWithShifts(scheduleId: number) {
         const schedule = await this.scheduleRepository.findByIdWithShifts(scheduleId);
         if (!schedule) {

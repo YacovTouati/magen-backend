@@ -37,6 +37,10 @@ export class ScheduleRepository {
         return prisma.schedule.findUnique({ where: { id } });
     }
 
+    async findByMonthAndYear(month: number, year: number) {
+        return prisma.schedule.findUnique({ where: { month_year: { month, year } } });
+    }
+
     async findByIdWithShifts(id: number) {
         return prisma.schedule.findUnique({
             where: { id },
