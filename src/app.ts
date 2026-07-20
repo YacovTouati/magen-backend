@@ -11,6 +11,7 @@ import { scheduleRouter } from './routes/scheduleRoutes';
 import { userRouter } from './routes/userRoutes';
 import { generalApiLimiter } from './middlewares/rateLimiters';
 import { globalErrorHandler, notFoundHandler } from './middlewares/errorHandler';
+import { startIntakeRetentionJob } from './jobs/intakeRetentionJob';
 
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
@@ -51,4 +52,5 @@ app.use(globalErrorHandler);
 
 app.listen(PORT, () => {
     console.log(`⚡ [Magen Backend]: השרת רץ בצורה מאובטחת על http://localhost:${PORT}`);
+    startIntakeRetentionJob();
 });

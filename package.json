@@ -18,6 +18,7 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.1.0",
+    "@types/node-cron": "^3.0.11",
     "@types/pg": "^8.20.0",
     "prisma": "^7.8.0",
     "ts-node": "^10.9.2",
@@ -37,6 +38,7 @@
     "helmet": "^8.2.0",
     "jsforce": "^3.10.19",
     "jsonwebtoken": "^9.0.3",
+    "node-cron": "^4.6.0",
     "pg": "^8.22.0"
   }
 }

@@ -155,10 +155,6 @@ export const validateCreateIntake = [
     .optional()
     .isIn(['NEW', 'NO_ANSWER', 'ACTIVE', 'CLOSED', 'LONG_TERM']).withMessage('סטטוס אינו תקין'),
 
-  body('assignedToId')
-    .optional({ nullable: true })
-    .isInt({ min: 1 }).withMessage('מזהה המטפל המשויך אינו תקין'),
-
   handleValidationErrors
 ];
 

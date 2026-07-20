@@ -1,13 +1,6 @@
 import prisma from '../db/prisma';
 import { IntakeStatus, IntakeUrgency } from '../types/intake';
 
-const assignedToSelect = {
-    id: true,
-    email: true,
-    name: true,
-    role: true,
-} as const;
-
 interface CreateIntakeData {
     callerName: string;
     phone: string;
@@ -15,20 +8,19 @@ interface CreateIntakeData {
     caseDescription: string;
     urgency: IntakeUrgency;
     status: IntakeStatus;
-    assignedToId: number | null;
 }
 
 export class IntakeRepository {
     async create(data: CreateIntakeData) {
         return prisma.intake.create({
             data,
-            include: { assignedTo: { select: assignedToSelect }, callReport: true },
+            include: { callReport: true },
         });
     }
 
-    async findAllWithAssignee() {
+    async findAll() {
         return prisma.intake.findMany({
-            include: { assignedTo: { select: assignedToSelect }, callReport: true },
+            include: { callReport: true },
             orderBy: { createdAt: 'desc' },
         });
     }
@@ -36,39 +28,39 @@ export class IntakeRepository {
     async findById(id: number) {
         return prisma.intake.findUnique({
             where: { id },
-            include: { assignedTo: { select: assignedToSelect }, callReport: true },
+            include: { callReport: true },
         });
     }
 
-    // Atomic: only succeeds if nobody has claimed the case since the caller checked.
-    async claimIfUnassigned(id: number, userId: number) {
-        return prisma.intake.updateMany({
-            where: { id, assignedToId: null },
-            data: { assignedToId: userId, status: 'ACTIVE' },
-        });
-    }
-
-    // Atomic: only succeeds if the caller is still the current owner.
-    async undoClaimIfOwner(id: number, userId: number) {
-        return prisma.intake.updateMany({
-            where: { id, assignedToId: userId },
-            data: { assignedToId: null, status: 'NEW' },
-        });
-    }
-
-    // Atomic: only succeeds if the case is claimed but not actively locked.
-    async takeoverIfReleased(id: number, userId: number) {
-        return prisma.intake.updateMany({
-            where: { id, assignedToId: { not: null }, NOT: { status: 'ACTIVE' } },
-            data: { assignedToId: userId },
-        });
-    }
-
-    // Atomic: only succeeds if the caller is still the current owner.
-    async updateStatusIfOwner(id: number, userId: number, status: IntakeStatus) {
-        return prisma.intake.updateMany({
-            where: { id, assignedToId: userId },
+    // No ownership guard needed anymore — any SUPER_ADMIN/INTAKE_ADMIN may
+    // update any intake's status, enforced at the route layer, not here.
+    async updateStatus(id: number, status: IntakeStatus) {
+        return prisma.intake.update({
+            where: { id },
             data: { status },
+            include: { callReport: true },
+        });
+    }
+
+    // Atomic: extends the row's *current* expiresAt by `days`, computed in
+    // SQL rather than read-then-write, so two concurrent extend calls both
+    // land instead of one clobbering the other.
+    async extendExpiration(id: number, days: number) {
+        return prisma.$executeRaw`
+            UPDATE "Intake"
+            SET "expiresAt" = "expiresAt" + make_interval(days => ${days})
+            WHERE id = ${id}
+        `;
+    }
+
+    async hardDelete(id: number) {
+        return prisma.intake.delete({ where: { id } });
+    }
+
+    // Permanent retention sweep — called by the cron job in src/jobs/.
+    async deleteExpired() {
+        return prisma.intake.deleteMany({
+            where: { expiresAt: { lte: new Date() } },
         });
     }
 }

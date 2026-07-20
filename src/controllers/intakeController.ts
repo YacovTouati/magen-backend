@@ -32,7 +32,7 @@ export const getIntakes = async (req: Request, res: Response) => {
 
 export const createIntake = async (req: Request, res: Response) => {
     try {
-        const { callerName, phone, contactedOtherCenter, caseDescription, urgency, status, assignedToId } = req.body;
+        const { callerName, phone, contactedOtherCenter, caseDescription, urgency, status } = req.body;
         const intake = await intakeService.create({
             callerName,
             phone,
@@ -40,42 +40,8 @@ export const createIntake = async (req: Request, res: Response) => {
             caseDescription,
             urgency,
             status,
-            assignedToId: assignedToId ?? null,
         });
         return res.status(201).json({ success: true, data: intake });
-    } catch (error) {
-        return handleError(res, error);
-    }
-};
-
-export const claimIntake = async (req: Request, res: Response) => {
-    const id = parseIntakeId(req, res);
-    if (id === null) return;
-    try {
-        const intake = await intakeService.claim(id, req.user!.id);
-        return res.status(200).json({ success: true, data: intake });
-    } catch (error) {
-        return handleError(res, error);
-    }
-};
-
-export const undoClaimIntake = async (req: Request, res: Response) => {
-    const id = parseIntakeId(req, res);
-    if (id === null) return;
-    try {
-        const intake = await intakeService.undoClaim(id, req.user!.id);
-        return res.status(200).json({ success: true, data: intake });
-    } catch (error) {
-        return handleError(res, error);
-    }
-};
-
-export const takeoverIntake = async (req: Request, res: Response) => {
-    const id = parseIntakeId(req, res);
-    if (id === null) return;
-    try {
-        const intake = await intakeService.takeover(id, req.user!.id);
-        return res.status(200).json({ success: true, data: intake });
     } catch (error) {
         return handleError(res, error);
     }
@@ -86,8 +52,30 @@ export const updateIntakeStatus = async (req: Request, res: Response) => {
     if (id === null) return;
     try {
         const { status } = req.body;
-        const intake = await intakeService.updateStatus(id, req.user!.id, status);
+        const intake = await intakeService.updateStatus(id, status);
         return res.status(200).json({ success: true, data: intake });
+    } catch (error) {
+        return handleError(res, error);
+    }
+};
+
+export const extendIntakeExpiration = async (req: Request, res: Response) => {
+    const id = parseIntakeId(req, res);
+    if (id === null) return;
+    try {
+        const intake = await intakeService.extendExpiration(id);
+        return res.status(200).json({ success: true, data: intake });
+    } catch (error) {
+        return handleError(res, error);
+    }
+};
+
+export const deleteIntake = async (req: Request, res: Response) => {
+    const id = parseIntakeId(req, res);
+    if (id === null) return;
+    try {
+        await intakeService.hardDelete(id);
+        return res.status(204).send();
     } catch (error) {
         return handleError(res, error);
     }

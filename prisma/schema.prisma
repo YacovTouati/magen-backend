@@ -30,7 +30,6 @@ model User {
   name             String
   role             UserRole          @default(VOLUNTEER)
   reports          CallReport[]
-  assignedIntakes  Intake[]
   shiftAssignments ShiftAssignment[]
   shifts           Shift[]
   createdAt        DateTime          @default(now())
@@ -135,18 +134,22 @@ model Intake {
   urgency              IntakeUrgency
   status               IntakeStatus  @default(NEW)
 
-  assignedToId Int?
-  assignedTo   User? @relation(fields: [assignedToId], references: [id])
-
   callReportId Int?        @unique
   callReport   CallReport? @relation(fields: [callReportId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([assignedToId])
+  // Data-retention deadline, not a business date — set by the DB itself so
+  // every creation path (manual admin creation, CallReport auto-linking, any
+  // future one) gets the same 14-day clock with no risk of a call site
+  // forgetting to set it. The retention cron purges rows past this deadline;
+  // PATCH /intakes/:id/extend pushes it out by 7 more days.
+  expiresAt DateTime @default(dbgenerated("(timezone('UTC'::text, now()) + '14 days'::interval)"))
+
   @@index([status])
   @@index([createdAt])
+  @@index([expiresAt])
 }
 
 model CallReport {
