@@ -44,7 +44,16 @@ export class IntakeService {
         if (affectedRows === 0) {
             throw new HttpError(404, 'תיק לא נמצא');
         }
-        return this.intakeRepository.findById(id);
+
+        const intake = await this.intakeRepository.findById(id);
+        if (!intake) {
+            // The UPDATE above genuinely affected the row, but it's gone by the
+            // time we read it back — the retention cron or a manual hard-delete
+            // won the race in the gap between the two statements. Report 404
+            // instead of a misleading 200 with null data.
+            throw new HttpError(404, 'תיק לא נמצא');
+        }
+        return intake;
     }
 
     // Immediate hard delete, on demand — separate from the automatic

@@ -13,7 +13,9 @@ export const intakeRouter = Router();
 
 intakeRouter.use('/intakes', authenticate);
 
-intakeRouter.get('/intakes', getIntakes);
+// List access restricted the same as every other intake mutation — a
+// VOLUNTEER has no route left in this file that touches intakes at all.
+intakeRouter.get('/intakes', checkRole('SUPER_ADMIN', 'INTAKE_ADMIN'), getIntakes);
 intakeRouter.post('/intakes', checkRole('SUPER_ADMIN', 'INTAKE_ADMIN'), validateCreateIntake, createIntake);
 
 // Case ownership no longer exists (removed along with assignedToId) — status

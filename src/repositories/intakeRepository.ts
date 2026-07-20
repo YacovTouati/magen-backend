@@ -1,6 +1,15 @@
 import prisma from '../db/prisma';
 import { IntakeStatus, IntakeUrgency } from '../types/intake';
 
+// The frontend's IntakeCallReport model (magen-app/src/app/services/intake.service.ts)
+// only ever reads these three fields off the joined CallReport — everything else
+// (summaryNotes, region, sector, etc.) was heavy over-fetch with no consumer.
+const callReportListSelect = {
+    id: true,
+    email: true,
+    reportingDuty: true,
+} as const;
+
 interface CreateIntakeData {
     callerName: string;
     phone: string;
@@ -14,13 +23,13 @@ export class IntakeRepository {
     async create(data: CreateIntakeData) {
         return prisma.intake.create({
             data,
-            include: { callReport: true },
+            include: { callReport: { select: callReportListSelect } },
         });
     }
 
     async findAll() {
         return prisma.intake.findMany({
-            include: { callReport: true },
+            include: { callReport: { select: callReportListSelect } },
             orderBy: { createdAt: 'desc' },
         });
     }
@@ -28,7 +37,7 @@ export class IntakeRepository {
     async findById(id: number) {
         return prisma.intake.findUnique({
             where: { id },
-            include: { callReport: true },
+            include: { callReport: { select: callReportListSelect } },
         });
     }
 
@@ -38,7 +47,7 @@ export class IntakeRepository {
         return prisma.intake.update({
             where: { id },
             data: { status },
-            include: { callReport: true },
+            include: { callReport: { select: callReportListSelect } },
         });
     }
 
