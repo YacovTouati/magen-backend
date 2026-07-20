@@ -1,4 +1,4 @@
-export type UserRole = 'ADMIN' | 'VOLUNTEER';
+export type UserRole = 'SUPER_ADMIN' | 'INTAKE_ADMIN' | 'SCHEDULER_ADMIN' | 'VOLUNTEER';
 
 export interface CreateUserPayload {
     email: string;

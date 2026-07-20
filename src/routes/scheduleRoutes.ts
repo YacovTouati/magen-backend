@@ -21,8 +21,8 @@ scheduleRouter.use('/schedules', authenticate);
 scheduleRouter.use('/shifts', authenticate);
 
 // Admin: prepare + publish a month's schedule
-scheduleRouter.post('/schedules', checkRole('ADMIN'), validateCreateSchedule, createSchedule);
-scheduleRouter.post('/schedules/:id/publish', checkRole('ADMIN'), publishSchedule);
+scheduleRouter.post('/schedules', checkRole('SUPER_ADMIN', 'SCHEDULER_ADMIN'), validateCreateSchedule, createSchedule);
+scheduleRouter.post('/schedules/:id/publish', checkRole('SUPER_ADMIN', 'SCHEDULER_ADMIN'), publishSchedule);
 
 // Any authenticated user (volunteer needs to see what's claimable) — read-only,
 // no role gate. Same open-read posture as GET /api/intakes and GET /api/assignments.
@@ -34,13 +34,13 @@ scheduleRouter.get('/schedules/:id/shifts', getScheduleShifts);
 scheduleRouter.post('/shifts/:id/claim', claimShift);
 
 // Admin-only escape hatch — the single path that can move a shift out of LOCKED.
-scheduleRouter.post('/shifts/:id/admin-release', checkRole('ADMIN'), adminReleaseShift);
+scheduleRouter.post('/shifts/:id/admin-release', checkRole('SUPER_ADMIN', 'SCHEDULER_ADMIN'), adminReleaseShift);
 
 // Admin-only escape hatch — assigns/overwrites a shift directly, bypassing the
 // OPEN-only guard that claimShiftIfAvailable enforces for volunteers.
 scheduleRouter.post(
     '/shifts/:id/admin-assign',
-    checkRole('ADMIN'),
+    checkRole('SUPER_ADMIN', 'SCHEDULER_ADMIN'),
     validateAdminAssignShift,
     adminAssignShift
 );

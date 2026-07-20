@@ -1,5 +1,5 @@
 import prisma from '../db/prisma';
-import { CreateUserPayload } from '../types/user';
+import { CreateUserPayload, UserRole } from '../types/user';
 
 export class UserRepository {
     async getAllUsers() {
@@ -36,6 +36,20 @@ export class UserRepository {
     async deleteUser(id: number) {
         return prisma.user.delete({
             where: { id },
+        });
+    }
+
+    async updateRole(id: number, role: UserRole) {
+        return prisma.user.update({
+            where: { id },
+            data: { role },
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                role: true,
+                createdAt: true,
+            },
         });
     }
 }

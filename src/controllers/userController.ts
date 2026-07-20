@@ -39,6 +39,24 @@ export const createUser = async (req: Request, res: Response) => {
     }
 };
 
+export const updateUserRole = async (req: Request, res: Response) => {
+    const userId = Number(req.params.id);
+    if (!Number.isInteger(userId)) {
+        return res.status(400).json({ success: false, message: 'מזהה משתמש אינו תקין' });
+    }
+
+    try {
+        const user = await userService.updateUserRole(userId, req.body.role);
+        return res.status(200).json({ success: true, data: user });
+    } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+            return res.status(404).json({ success: false, message: 'משתמש לא נמצא' });
+        }
+        console.error('⛔ User controller error:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
+
 export const deleteUser = async (req: Request, res: Response) => {
     const userId = Number(req.params.id);
     if (!Number.isInteger(userId)) {

@@ -12,5 +12,5 @@ export const assignmentRouter = Router();
 assignmentRouter.use('/assignments', authenticate);
 
 assignmentRouter.get('/assignments', getAssignments);
-assignmentRouter.post('/assignments', checkRole('ADMIN'), validateUpsertAssignment, upsertAssignment);
-assignmentRouter.delete('/assignments/:date', checkRole('ADMIN'), deleteAssignment);
+assignmentRouter.post('/assignments', checkRole('SUPER_ADMIN', 'SCHEDULER_ADMIN'), validateUpsertAssignment, upsertAssignment);
+assignmentRouter.delete('/assignments/:date', checkRole('SUPER_ADMIN', 'SCHEDULER_ADMIN'), deleteAssignment);

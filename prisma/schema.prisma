@@ -13,8 +13,13 @@ datasource db {
   provider = "postgresql"
 }
 
+// SUPER_ADMIN is the full-access superset that replaces the old flat ADMIN
+// role; INTAKE_ADMIN and SCHEDULER_ADMIN are scoped admin types that only
+// gate their own domain (see checkRole(...) call sites in routes/).
 enum UserRole {
-  ADMIN
+  SUPER_ADMIN
+  INTAKE_ADMIN
+  SCHEDULER_ADMIN
   VOLUNTEER
 }
 

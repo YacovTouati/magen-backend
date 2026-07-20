@@ -93,7 +93,15 @@ export const validateCreateUser = [
     .notEmpty().withMessage('חובה להזין שם'),
 
   body('role')
-    .isIn(['ADMIN', 'VOLUNTEER']).withMessage('תפקיד המשתמש אינו תקין'),
+    .isIn(['SUPER_ADMIN', 'INTAKE_ADMIN', 'SCHEDULER_ADMIN', 'VOLUNTEER']).withMessage('תפקיד המשתמש אינו תקין'),
+
+  handleValidationErrors
+];
+
+// 🛡️ חוקי אימות לעדכון תפקיד משתמש קיים
+export const validateUpdateUserRole = [
+  body('role')
+    .isIn(['SUPER_ADMIN', 'INTAKE_ADMIN', 'SCHEDULER_ADMIN', 'VOLUNTEER']).withMessage('תפקיד המשתמש אינו תקין'),
 
   handleValidationErrors
 ];

@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import { UserRepository } from '../repositories/userRepository';
-import { CreateUserPayload } from '../types/user';
+import { CreateUserPayload, UserRole } from '../types/user';
 
 export class UserService {
     private userRepository = new UserRepository();
@@ -19,5 +19,9 @@ export class UserService {
 
     async deleteUser(id: number) {
         return this.userRepository.deleteUser(id);
+    }
+
+    async updateUserRole(id: number, role: UserRole) {
+        return this.userRepository.updateRole(id, role);
     }
 }
