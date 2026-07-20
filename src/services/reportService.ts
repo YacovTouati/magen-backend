@@ -17,7 +17,7 @@ export class ReportService {
 
         const { report, intake } = await this.reportRepository.saveReportWithIntake(rawData, {
             urgency: CALL_PURPOSE_TO_URGENCY[rawData.callPurpose],
-            contactedOtherCenter: rawData.contactedOtherCenterBefore ? 'כן' : 'לא',
+            contactedOtherCenter: rawData.receivedSupportAtOtherCenter ? 'כן' : 'לא',
         });
 
         return { report, intake };

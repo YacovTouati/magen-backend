@@ -1,9 +1,9 @@
 import { body, query, validationResult } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
 
-// מספר טלפון: ספרות בלבד, עד 10 תווים (למשל 0501234567)
-const PHONE_PATTERN = /^\d{1,10}$/;
-const PHONE_INVALID_MESSAGE = 'מספר הטלפון אינו תקין (מקסימום 10 ספרות)';
+// מספר טלפון: ספרות בלבד, בין 7 ספרות (קווי) ל-10 ספרות (נייד)
+const PHONE_PATTERN = /^\d{7,10}$/;
+const PHONE_INVALID_MESSAGE = 'מספר הטלפון אינו תקין (נדרשות בין 7 ל-10 ספרות)';
 
 // פונקציית ניתוח תוצאות בדיקה משותפת
 const handleValidationErrors = (req: Request, res: Response, next: NextFunction) => {
@@ -44,14 +44,17 @@ export const validateCallReport = [
     .bail()
     .matches(PHONE_PATTERN).withMessage(PHONE_INVALID_MESSAGE),
 
+  // אופציונלי — דוח יכול להישמר גם אם שדה המייל נותר ריק
   body('email')
+    .optional({ nullable: true, checkFalsy: true })
     .trim()
-    .notEmpty().withMessage('חובה להזין כתובת מייל')
     .isEmail().withMessage('כתובת המייל שהוזנה אינה תקינה'),
 
+  // טקסט חופשי (לא רשימה סגורה) — כתובת/יישוב בפועל, לא רק אזור כללי בארץ
   body('region')
-    .isIn(['north', 'center', 'south', 'jerusalem', 'haifa', 'judea_samaria'])
-    .withMessage('אזור בארץ אינו תקין'),
+    .trim()
+    .notEmpty().withMessage('חובה להזין אזור בארץ')
+    .isLength({ max: 200 }).withMessage('אזור בארץ ארוך מדי'),
 
   body('gender')
     .isIn(['male', 'female', 'other', 'unknown'])
@@ -61,8 +64,15 @@ export const validateCallReport = [
     .isIn(['secular', 'traditional', 'religious', 'ultra_orthodox', 'arab', 'other'])
     .withMessage('המגזר שהוזן אינו תקין'),
 
-  body('contactedOtherCenterBefore')
-    .isBoolean().withMessage('השדה האם פנה בעבר למרכז אחר חייב להיות כן או לא (בוליאני)'),
+  body('receivedSupportAtOtherCenter')
+    .isBoolean().withMessage('השדה האם קיבל ליווי במרכז סיוע אחר חייב להיות כן או לא (בוליאני)'),
+
+  body('isFamilyMemberOrAcquaintance')
+    .isBoolean().withMessage('השדה האם מכר או בן משפחה של נפגע חייב להיות כן או לא (בוליאני)'),
+
+  body('magenContactHistory')
+    .isIn(['first_time', 'past', 'dont_remember'])
+    .withMessage('היסטוריית הפנייה למגן אינה תקינה'),
 
   handleValidationErrors
 ];

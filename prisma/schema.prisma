@@ -145,20 +145,26 @@ model Intake {
 }
 
 model CallReport {
-  id                         Int      @id @default(autoincrement())
-  callDuration               Int
-  callerType                 String
-  callPurpose                String
-  summaryNotes               String
-  callerName                 String
-  phone                      String
-  email                      String?
-  region                     String
-  gender                     String
-  sector                     String
-  contactedOtherCenterBefore Boolean
-  reportingDuty              Boolean?
-  createdAt                  DateTime @default(now())
+  id                            Int      @id @default(autoincrement())
+  callDuration                  Int
+  callerType                    String
+  callPurpose                   String
+  summaryNotes                  String
+  callerName                    String
+  phone                         String
+  email                         String?
+  region                        String
+  gender                        String
+  sector                        String
+  // "האם קיבל ליווי במרכז סיוע אחר?" — renamed from contactedOtherCenterBefore,
+  // which asked about prior contact rather than support actually received.
+  receivedSupportAtOtherCenter  Boolean
+  isFamilyMemberOrAcquaintance  Boolean
+  // 'first_time' | 'past' | 'dont_remember' — validated at the API layer, same
+  // convention as region/gender/sector: a Prisma String, not a Prisma enum.
+  magenContactHistory           String
+  reportingDuty                 Boolean?
+  createdAt                     DateTime @default(now())
 
   createdById Int?
   createdBy   User? @relation(fields: [createdById], references: [id])

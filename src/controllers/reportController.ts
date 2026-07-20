@@ -8,7 +8,8 @@ export const createCallReport = async (req: Request, res: Response) => {
         // חילוץ כל השדות הישנים והחדשים שעברו את ה-Validator בהצלחה
         const {
             callDuration, callerType, callPurpose, summaryNotes,
-            callerName, phone, email, region, gender, sector, contactedOtherCenterBefore,
+            callerName, phone, email, region, gender, sector,
+            receivedSupportAtOtherCenter, isFamilyMemberOrAcquaintance, magenContactHistory,
             reportingDuty
         } = req.body;
 
@@ -20,11 +21,13 @@ export const createCallReport = async (req: Request, res: Response) => {
             summaryNotes,
             callerName,
             phone,
-            email,
+            email: email ? email : null, // "" left by an optional/blank form field stores as NULL, not ""
             region,
             gender,
             sector,
-            contactedOtherCenterBefore,
+            receivedSupportAtOtherCenter,
+            isFamilyMemberOrAcquaintance,
+            magenContactHistory,
             reportingDuty,
             createdById: req.user!.id
         });

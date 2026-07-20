@@ -1,8 +1,8 @@
 export type CallerType = 'victim' | 'family' | 'friend';
 export type CallPurpose = 'counseling' | 'coercion' | 'crisis';
-export type Region = 'north' | 'center' | 'south' | 'jerusalem' | 'haifa' | 'judea_samaria';
 export type Gender = 'male' | 'female' | 'other' | 'unknown';
 export type Sector = 'secular' | 'traditional' | 'religious' | 'ultra_orthodox' | 'arab' | 'other';
+export type MagenContactHistory = 'first_time' | 'past' | 'dont_remember';
 
 export interface CallReport {
     callDuration: number;
@@ -12,10 +12,12 @@ export interface CallReport {
     callerName: string;
     phone: string;
     email: string | null;
-    region: Region;
+    region: string;
     gender: Gender;
     sector: Sector;
-    contactedOtherCenterBefore: boolean;
+    receivedSupportAtOtherCenter: boolean;
+    isFamilyMemberOrAcquaintance: boolean;
+    magenContactHistory: MagenContactHistory;
     reportingDuty?: boolean;
     createdById?: number | null;
 }
