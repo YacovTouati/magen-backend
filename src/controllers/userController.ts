@@ -1,41 +1,48 @@
 import { Request, Response } from 'express';
 import { Prisma } from '../generated/prisma/client';
+import { HttpError } from '../errors/httpError';
 import { UserService } from '../services/userService';
-import { CreateUserPayload } from '../types/user';
+import { InviteService } from '../services/inviteService';
 
 const userService = new UserService();
+const inviteService = new InviteService();
 
-const isUniqueConstraintError = (error: unknown): error is Prisma.PrismaClientKnownRequestError =>
-    error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
+const handleError = (res: Response, error: unknown) => {
+    if (error instanceof HttpError) {
+        return res.status(error.statusCode).json({ success: false, message: error.message });
+    }
+    console.error('⛔ User controller error:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+};
 
 export const getUsers = async (req: Request, res: Response) => {
     try {
         const users = await userService.getAllUsers();
         return res.status(200).json({ success: true, data: users });
     } catch (error) {
-        console.error('⛔ User controller error:', error);
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        return handleError(res, error);
     }
 };
 
-export const createUser = async (req: Request, res: Response) => {
+// Replaces the old createUser — no password field exists here at all. The
+// admin only picks who gets in and what role they'll have; the invitee sets
+// their own password at POST /auth/register.
+export const inviteUser = async (req: Request, res: Response) => {
     try {
-        // בונים אובייקט מפורש עם שדות מורשים בלבד — לא מעבירים את req.body כמות שהוא,
-        // כדי שלקוח לא יוכל להזריק שדות נוספים (כמו id/createdAt) ישירות ל-Prisma
-        const payload: CreateUserPayload = {
-            email: req.body.email,
-            password: req.body.password,
-            name: req.body.name,
-            role: req.body.role,
-        };
-        const user = await userService.createUser(payload);
-        return res.status(201).json({ success: true, data: user });
+        const { email, role } = req.body;
+        const invite = await inviteService.inviteUser(email, role, req.user!.id);
+        return res.status(201).json({ success: true, data: invite });
     } catch (error) {
-        if (isUniqueConstraintError(error)) {
-            return res.status(409).json({ success: false, message: 'כתובת המייל כבר קיימת במערכת' });
-        }
-        console.error('⛔ User controller error:', error);
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        return handleError(res, error);
+    }
+};
+
+export const listInvitations = async (req: Request, res: Response) => {
+    try {
+        const invites = await inviteService.listPendingInvites();
+        return res.status(200).json({ success: true, data: invites });
+    } catch (error) {
+        return handleError(res, error);
     }
 };
 
@@ -52,8 +59,7 @@ export const updateUserRole = async (req: Request, res: Response) => {
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
             return res.status(404).json({ success: false, message: 'משתמש לא נמצא' });
         }
-        console.error('⛔ User controller error:', error);
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        return handleError(res, error);
     }
 };
 
@@ -70,7 +76,16 @@ export const deleteUser = async (req: Request, res: Response) => {
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
             return res.status(404).json({ success: false, message: 'משתמש לא נמצא' });
         }
-        console.error('⛔ User controller error:', error);
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        return handleError(res, error);
+    }
+};
+
+export const changePassword = async (req: Request, res: Response) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        await userService.changePassword(req.user!.id, currentPassword, newPassword);
+        return res.status(200).json({ success: true, message: 'הסיסמה עודכנה בהצלחה' });
+    } catch (error) {
+        return handleError(res, error);
     }
 };

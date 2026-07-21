@@ -24,15 +24,50 @@ enum UserRole {
 }
 
 model User {
-  id               Int               @id @default(autoincrement())
-  email            String            @unique
-  password         String
-  name             String
-  role             UserRole          @default(VOLUNTEER)
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  password String
+  name     String
+  phone    String?
+  role     UserRole @default(VOLUNTEER)
+
+  // Single active reset token at a time — a fresh forgot-password request
+  // simply overwrites these, implicitly invalidating whatever was pending.
+  // Stores a SHA-256 hash, never the raw token (see src/utils/tokens.ts) —
+  // a DB dump alone must never be enough to reset every account.
+  passwordResetTokenHash String?
+  passwordResetExpiresAt DateTime?
+
   reports          CallReport[]
   shiftAssignments ShiftAssignment[]
   shifts           Shift[]
+  sentInvites      InvitedUser[]     @relation("InvitedBy")
   createdAt        DateTime          @default(now())
+}
+
+// The invite-only whitelist: an admin creates one of these (email + role,
+// no password — the invitee sets their own at registration), and only a
+// matching, unexpired, unused row lets POST /auth/register succeed for
+// that email.
+model InvitedUser {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  role      UserRole
+  // SHA-256 hash of the raw token that goes out in the invite link/email —
+  // same rationale as User.passwordResetTokenHash.
+  tokenHash String    @unique
+  expiresAt DateTime
+  // null = still pending; set once POST /auth/register consumes it. Kept
+  // (not deleted) as an audit trail of who accepted an invite and when.
+  usedAt DateTime?
+
+  invitedById Int?
+  invitedBy   User? @relation("InvitedBy", fields: [invitedById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
 }
 
 model ShiftAssignment {

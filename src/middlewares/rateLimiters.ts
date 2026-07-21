@@ -27,3 +27,13 @@ export const reportSubmissionLimiter = rateLimit({
     legacyHeaders: false,
     message: { success: false, message: 'יותר מדי דיווחים נשלחו מכתובת זו, אנא נסה שוב מאוחר יותר' },
 });
+
+// הגנה על פעולות אימות רגישות: הרשמה, שכחתי סיסמה, איפוס סיסמה, שינוי סיסמה —
+// כולן פוטנציאל לניחוש טוקנים/סיסמאות או לאיסוף מיילים רשומים (enumeration)
+export const authActionLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 דקות
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: 'יותר מדי בקשות, אנא נסה שוב בעוד כמה דקות' },
+});
