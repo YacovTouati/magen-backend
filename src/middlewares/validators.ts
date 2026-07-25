@@ -216,17 +216,6 @@ export const validateCreateIntake = [
   handleValidationErrors
 ];
 
-// 🛡️ חוקי אימות לשיבוץ מתנדב ליום ביומן
-export const validateUpsertAssignment = [
-  body('date')
-    .isISO8601().withMessage('תאריך אינו תקין (נדרש פורמט YYYY-MM-DD)'),
-
-  body('volunteerId')
-    .isInt({ min: 1 }).withMessage('מזהה המתנדב אינו תקין'),
-
-  handleValidationErrors
-];
-
 // 🛡️ חוקי אימות ליצירת לוח משמרות חודשי
 export const validateCreateSchedule = [
   body('month')

@@ -3,7 +3,6 @@ import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { analyticsRouter } from './routes/analyticsRoutes';
-import { assignmentRouter } from './routes/assignmentRoutes';
 import { authRouter } from './routes/authRoutes';
 import { intakeRouter } from './routes/intakeRoutes';
 import { reportRouter } from './routes/reportRoutes';
@@ -37,7 +36,6 @@ app.get('/health', (req: Request, res: Response) => {
 // Mount API routers under /api
 app.use('/api', generalApiLimiter);
 app.use('/api', analyticsRouter);
-app.use('/api', assignmentRouter);
 app.use('/api', authRouter);
 app.use('/api', intakeRouter);
 app.use('/api', reportRouter);
