@@ -2,11 +2,12 @@ import { Resend } from 'resend';
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-// resend.dev's default shared test domain — works with no domain verification,
-// but only deliverable in practice to the Resend account's own verified/test
-// recipient addresses. Swap for a verified sending domain before this needs to
-// reach arbitrary real users.
-const FROM_ADDRESS = 'onboarding@resend.dev';
+// magen-app.com is now verified in Resend — sending from it instead of the
+// shared onboarding@resend.dev test domain, which was rate-limited and only
+// reliably deliverable to the account's own verified addresses. Overridable
+// via env (matching FRONTEND_URL's pattern) in case the sender ever needs to
+// change without a code deploy.
+const FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || 'noreply@magen-app.com';
 
 const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
