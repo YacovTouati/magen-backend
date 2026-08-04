@@ -4,6 +4,7 @@ import {
     deleteIntake,
     extendIntakeExpiration,
     getIntakes,
+    getUnhandledIntakeCount,
     updateIntakeStatus,
 } from '../controllers/intakeController';
 import { authenticate, checkRole } from '../middlewares/auth';
@@ -16,6 +17,11 @@ intakeRouter.use('/intakes', authenticate);
 // List access restricted the same as every other intake mutation — a
 // VOLUNTEER has no route left in this file that touches intakes at all.
 intakeRouter.get('/intakes', checkRole('SUPER_ADMIN', 'INTAKE_ADMIN'), getIntakes);
+
+// Same "view intakes" permission as the list above — the count reveals
+// information about a permission-gated resource, so it gets the identical gate.
+intakeRouter.get('/intakes/unhandled-count', checkRole('SUPER_ADMIN', 'INTAKE_ADMIN'), getUnhandledIntakeCount);
+
 intakeRouter.post('/intakes', checkRole('SUPER_ADMIN', 'INTAKE_ADMIN'), validateCreateIntake, createIntake);
 
 // Case ownership no longer exists (removed along with assignedToId) — status

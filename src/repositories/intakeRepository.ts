@@ -1,14 +1,28 @@
 import prisma from '../db/prisma';
 import { IntakeStatus, IntakeUrgency } from '../types/intake';
 
-// The frontend's IntakeCallReport model (magen-app/src/app/services/intake.service.ts)
-// only ever reads these three fields off the joined CallReport — everything else
-// (summaryNotes, region, sector, etc.) was heavy over-fetch with no consumer.
+// Every CallReport field the Intakes management view needs to display:
+// email/region (contact + location), reportingDuty (mandatory-reporting flag),
+// magenContactHistory (prior contact with Magen), callerType (applicant type),
+// and summaryNotes (full call content, alongside Intake.caseDescription itself).
+// Deliberately still NOT `callReport: true` — gender, sector,
+// receivedSupportAtOtherCenter, isFamilyMemberOrAcquaintance, callDuration,
+// callPurpose etc. have no consumer here and stay excluded, same reasoning as
+// before (see the earlier over-fetch trim this select already went through).
 const callReportListSelect = {
     id: true,
     email: true,
+    region: true,
     reportingDuty: true,
+    magenContactHistory: true,
+    callerType: true,
+    summaryNotes: true,
 } as const;
+
+// A case nobody has started working yet. NO_ANSWER deliberately excluded —
+// an attempt was already made, so it isn't "untouched," it needs a retry.
+// Adjust this one array if the definition of "unhandled" should ever widen.
+const UNHANDLED_STATUSES: IntakeStatus[] = ['NEW'];
 
 interface CreateIntakeData {
     callerName: string;
@@ -31,6 +45,15 @@ export class IntakeRepository {
         return prisma.intake.findMany({
             include: { callReport: { select: callReportListSelect } },
             orderBy: { createdAt: 'desc' },
+        });
+    }
+
+    // Deliberately a count(), not findMany().length — the frontend badge only
+    // needs the number, so this never pulls a single Intake/CallReport row
+    // over the wire just to count them.
+    async countUnhandled() {
+        return prisma.intake.count({
+            where: { status: { in: UNHANDLED_STATUSES } },
         });
     }
 

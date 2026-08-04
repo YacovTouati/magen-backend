@@ -30,6 +30,17 @@ export const getIntakes = async (req: Request, res: Response) => {
     }
 };
 
+// Backs the frontend's notification badge — deliberately just { count }, not
+// the full intake list, so the badge can poll this cheaply.
+export const getUnhandledIntakeCount = async (req: Request, res: Response) => {
+    try {
+        const count = await intakeService.getUnhandledCount();
+        return res.status(200).json({ success: true, data: { count } });
+    } catch (error) {
+        return handleError(res, error);
+    }
+};
+
 export const createIntake = async (req: Request, res: Response) => {
     try {
         const { callerName, phone, contactedOtherCenter, caseDescription, urgency, status } = req.body;
@@ -75,7 +86,7 @@ export const deleteIntake = async (req: Request, res: Response) => {
     if (id === null) return;
     try {
         await intakeService.hardDelete(id);
-        return res.status(204).send();
+        return res.status(200).json({ success: true, message: 'Intake deleted successfully' });
     } catch (error) {
         return handleError(res, error);
     }

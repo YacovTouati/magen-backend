@@ -15,6 +15,10 @@ export class IntakeService {
         return this.intakeRepository.findAll();
     }
 
+    async getUnhandledCount() {
+        return this.intakeRepository.countUnhandled();
+    }
+
     async create(payload: CreateIntakePayload) {
         return this.intakeRepository.create({
             callerName: payload.callerName,
