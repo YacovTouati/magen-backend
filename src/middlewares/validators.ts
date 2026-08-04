@@ -28,7 +28,7 @@ export const validateCallReport = [
     .isInt({ min: 1, max: 480 }).withMessage('אורך השיחה חייב להיות מספר דקות הגיוני (בין 1 ל-480)'),
 
   body('callerType')
-    .isIn(['victim', 'family', 'friend']).withMessage('סוג הפונה אינו תקין'),
+    .isIn(['victim', 'family', 'friend', 'unknown']).withMessage('סוג הפונה אינו תקין'),
 
   body('callPurpose')
     .isIn(['counseling', 'coercion', 'crisis']).withMessage('מטרת השיחה אינה תואמת את הגדרות הארגון'),

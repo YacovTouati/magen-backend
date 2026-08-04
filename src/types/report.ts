@@ -1,4 +1,4 @@
-export type CallerType = 'victim' | 'family' | 'friend';
+export type CallerType = 'victim' | 'family' | 'friend' | 'unknown';
 export type CallPurpose = 'counseling' | 'coercion' | 'crisis';
 export type Gender = 'male' | 'female' | 'other' | 'unknown';
 export type Sector = 'secular' | 'traditional' | 'religious' | 'ultra_orthodox' | 'arab' | 'other';
