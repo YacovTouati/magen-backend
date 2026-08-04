@@ -201,12 +201,17 @@ model CallReport {
   sector                        String
   // "האם קיבל ליווי במרכז סיוע אחר?" — renamed from contactedOtherCenterBefore,
   // which asked about prior contact rather than support actually received.
-  receivedSupportAtOtherCenter  Boolean
+  // 'yes' | 'no' | 'unknown' — was a Boolean until a third "unknown" option was
+  // needed; validated at the API layer, same convention as region/gender/sector.
+  receivedSupportAtOtherCenter  String
   isFamilyMemberOrAcquaintance  Boolean
   // 'first_time' | 'past' | 'dont_remember' — validated at the API layer, same
   // convention as region/gender/sector: a Prisma String, not a Prisma enum.
   magenContactHistory           String
-  reportingDuty                 Boolean?
+  // 'no' | 'yes_practical' | 'yes_principled', or null when not indicated —
+  // was a nullable Boolean until "yes" needed to distinguish practical vs
+  // principled reporting duty.
+  reportingDuty                 String?
   createdAt                     DateTime @default(now())
 
   createdById Int?

@@ -1,5 +1,5 @@
 import { ReportRepository } from '../repositories/reportRepository';
-import { CallReport, CallPurpose } from '../types/report';
+import { CallReport, CallPurpose, ReceivedSupportAtOtherCenter } from '../types/report';
 import { IntakeUrgency } from '../types/intake';
 
 // שיחת מצוקה נכנסת כתיק בעדיפות קריטית; כפייה כגבוהה; ייעוץ כבינונית — עד שתהיה שדה ייעודי בטופס
@@ -7,6 +7,12 @@ const CALL_PURPOSE_TO_URGENCY: Record<CallPurpose, IntakeUrgency> = {
     crisis: 'CRITICAL',
     coercion: 'HIGH',
     counseling: 'MEDIUM',
+};
+
+const RECEIVED_SUPPORT_TO_HEBREW: Record<ReceivedSupportAtOtherCenter, string> = {
+    yes: 'כן',
+    no: 'לא',
+    unknown: 'לא ידוע',
 };
 
 export class ReportService {
@@ -17,7 +23,7 @@ export class ReportService {
 
         const { report, intake } = await this.reportRepository.saveReportWithIntake(rawData, {
             urgency: CALL_PURPOSE_TO_URGENCY[rawData.callPurpose],
-            contactedOtherCenter: rawData.receivedSupportAtOtherCenter ? 'כן' : 'לא',
+            contactedOtherCenter: RECEIVED_SUPPORT_TO_HEBREW[rawData.receivedSupportAtOtherCenter],
         });
 
         return { report, intake };

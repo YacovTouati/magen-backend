@@ -3,6 +3,8 @@ export type CallPurpose = 'counseling' | 'coercion' | 'crisis';
 export type Gender = 'male' | 'female' | 'other' | 'unknown';
 export type Sector = 'secular' | 'traditional' | 'religious' | 'ultra_orthodox' | 'arab' | 'other';
 export type MagenContactHistory = 'first_time' | 'past' | 'dont_remember';
+export type ReceivedSupportAtOtherCenter = 'yes' | 'no' | 'unknown';
+export type ReportingDuty = 'no' | 'yes_practical' | 'yes_principled';
 
 export interface CallReport {
     callDuration: number;
@@ -15,9 +17,9 @@ export interface CallReport {
     region: string;
     gender: Gender;
     sector: Sector;
-    receivedSupportAtOtherCenter: boolean;
+    receivedSupportAtOtherCenter: ReceivedSupportAtOtherCenter;
     isFamilyMemberOrAcquaintance: boolean;
     magenContactHistory: MagenContactHistory;
-    reportingDuty?: boolean;
+    reportingDuty?: ReportingDuty | null;
     createdById?: number | null;
 }
