@@ -5,7 +5,7 @@ import { EmailService } from './emailService';
 import { generateToken, hashToken } from '../utils/tokens';
 import { UserRole } from '../types/user';
 
-const INVITE_TTL_MS = 48 * 60 * 60 * 1000; // 48 hours
+const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days (168 hours)
 
 export class InviteService {
     private invitedUserRepository = new InvitedUserRepository();

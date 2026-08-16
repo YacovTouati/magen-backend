@@ -29,11 +29,15 @@ const linkButtonHtml = (link: string, label: string, color: string): string => `
 
 export class EmailService {
     async sendInviteEmail(email: string, rawToken: string): Promise<void> {
-        const link = `${FRONTEND_URL}/register?token=${rawToken}`;
+        // register.component.ts (frontend) requires BOTH query params to accept the link —
+        // email alone identifies which whitelist row to check, token alone can't prove it's
+        // this invitee. Omitting either lands the user on the "invalid link" state instead
+        // of the registration form.
+        const link = `${FRONTEND_URL}/register?token=${encodeURIComponent(rawToken)}&email=${encodeURIComponent(email)}`;
         const html = wrapRtlEmail(
             'הזמנה למערכת מגן',
             `<p style="color: #374151; font-size: 15px; line-height: 1.6;">
-                הוזמנת להירשם למערכת מגן. הקישור בתוקף ל-48 שעות.
+                הוזמנת להירשם למערכת מגן. הקישור בתוקף ל-7 ימים.
              </p>` + linkButtonHtml(link, 'לחץ כאן להשלמת ההרשמה', '#16a34a')
         );
 
