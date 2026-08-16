@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
     changePassword,
+    deleteInvitation,
     deleteUser,
     getUsers,
     inviteUser,
@@ -25,6 +26,7 @@ userRouter.get('/users', checkRole('SUPER_ADMIN', 'SCHEDULER_ADMIN'), getUsers);
 // anywhere in this file anymore — invitees set their own at POST /auth/register.
 userRouter.post('/users/invite', checkRole('SUPER_ADMIN'), validateInviteUser, inviteUser);
 userRouter.get('/users/invitations', checkRole('SUPER_ADMIN'), listInvitations);
+userRouter.delete('/users/invitations/:id', checkRole('SUPER_ADMIN'), deleteInvitation);
 userRouter.patch('/users/:id/role', checkRole('SUPER_ADMIN'), validateUpdateUserRole, updateUserRole);
 userRouter.delete('/users/:id', checkRole('SUPER_ADMIN'), deleteUser);
 

@@ -65,6 +65,10 @@ export class InvitedUserRepository {
         });
     }
 
+    async deleteById(id: number) {
+        return prisma.invitedUser.delete({ where: { id } });
+    }
+
     async findAllPending() {
         return prisma.invitedUser.findMany({
             where: { usedAt: null },

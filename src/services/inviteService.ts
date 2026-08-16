@@ -47,4 +47,11 @@ export class InviteService {
     async listPendingInvites() {
         return this.invitedUserRepository.findAllPending();
     }
+
+    // Removes the pending invite outright — used/expired invites are cleanup targets
+    // here just as much as still-open ones, no usedAt/expiresAt guard on purpose.
+    // P2025 (no such row) is left to bubble up; the controller maps it to a 404.
+    async deleteInvitation(id: number) {
+        await this.invitedUserRepository.deleteById(id);
+    }
 }

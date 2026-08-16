@@ -46,6 +46,23 @@ export const listInvitations = async (req: Request, res: Response) => {
     }
 };
 
+export const deleteInvitation = async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) {
+        return res.status(400).json({ success: false, message: 'מזהה הזמנה אינו תקין' });
+    }
+
+    try {
+        await inviteService.deleteInvitation(id);
+        return res.status(200).json({ success: true, message: 'ההזמנה נמחקה בהצלחה' });
+    } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+            return res.status(404).json({ success: false, message: 'ההזמנה לא נמצאה' });
+        }
+        return handleError(res, error);
+    }
+};
+
 export const updateUserRole = async (req: Request, res: Response) => {
     const userId = Number(req.params.id);
     if (!Number.isInteger(userId)) {
