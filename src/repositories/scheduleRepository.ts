@@ -114,4 +114,17 @@ export class ScheduleRepository {
             },
         });
     }
+
+    // note: null clears it (used by the DELETE .../note route) — independent of
+    // status/volunteerId, so this never touches claim/lock state.
+    async updateShiftNote(id: number, note: string | null) {
+        return prisma.shift.update({
+            where: { id },
+            data: { note },
+            include: {
+                volunteer: { select: volunteerSelect },
+                schedule: { select: { id: true, status: true, month: true, year: true } },
+            },
+        });
+    }
 }

@@ -136,6 +136,11 @@ model Shift {
   // audit trail, useful the moment anyone asks "when was this actually claimed."
   lockedAt DateTime?
 
+  // Free-text admin/scheduler annotation for hours deviations on this specific shift
+  // (e.g. "Miri worked until 18:00") — independent of status/volunteer, so it survives
+  // claims/releases/reassignment untouched.
+  note String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

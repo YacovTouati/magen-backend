@@ -97,4 +97,17 @@ export class ScheduleService {
             throw error;
         }
     }
+
+    // Shared by both PATCH (set/update) and DELETE (clear, note = null) — a shift
+    // note has no status/ownership guard of its own, so a plain update is enough.
+    async updateShiftNote(shiftId: number, note: string | null) {
+        try {
+            return await this.scheduleRepository.updateShiftNote(shiftId, note);
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+                throw new HttpError(404, 'משמרת לא נמצאה');
+            }
+            throw error;
+        }
+    }
 }

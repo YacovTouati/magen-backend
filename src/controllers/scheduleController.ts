@@ -106,3 +106,26 @@ export const adminAssignShift = async (req: Request, res: Response) => {
         return handleError(res, error);
     }
 };
+
+export const updateShiftNote = async (req: Request, res: Response) => {
+    const id = parseShiftId(req, res);
+    if (id === null) return;
+    try {
+        const { note } = req.body;
+        const shift = await scheduleService.updateShiftNote(id, note);
+        return res.status(200).json({ success: true, data: shift });
+    } catch (error) {
+        return handleError(res, error);
+    }
+};
+
+export const deleteShiftNote = async (req: Request, res: Response) => {
+    const id = parseShiftId(req, res);
+    if (id === null) return;
+    try {
+        const shift = await scheduleService.updateShiftNote(id, null);
+        return res.status(200).json({ success: true, data: shift });
+    } catch (error) {
+        return handleError(res, error);
+    }
+};

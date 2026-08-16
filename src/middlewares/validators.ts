@@ -251,3 +251,13 @@ export const validateAdminAssignShift = [
 
   handleValidationErrors
 ];
+
+// 🛡️ חוקי אימות להערת סטייה במשמרת (לדוגמה: "מירי עבדה עד 18:00")
+export const validateShiftNote = [
+  body('note')
+    .trim()
+    .notEmpty().withMessage('חובה להזין תוכן להערה')
+    .isLength({ max: 500 }).withMessage('ההערה ארוכה מדי (עד 500 תווים)'),
+
+  handleValidationErrors
+];

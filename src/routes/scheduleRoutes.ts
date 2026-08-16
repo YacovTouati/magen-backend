@@ -4,15 +4,18 @@ import {
     adminReleaseShift,
     claimShift,
     createSchedule,
+    deleteShiftNote,
     getScheduleByMonthYear,
     getScheduleShifts,
     publishSchedule,
+    updateShiftNote,
 } from '../controllers/scheduleController';
 import { authenticate, checkRole } from '../middlewares/auth';
 import {
     validateAdminAssignShift,
     validateCreateSchedule,
     validateScheduleLookup,
+    validateShiftNote,
 } from '../middlewares/validators';
 
 export const scheduleRouter = Router();
@@ -43,4 +46,20 @@ scheduleRouter.post(
     checkRole('SUPER_ADMIN', 'SCHEDULER_ADMIN'),
     validateAdminAssignShift,
     adminAssignShift
+);
+
+// Admin/scheduler-only, same gate as every other shift-management mutation above —
+// a note logs an admin-observed hours deviation, not something a volunteer self-edits.
+// GET needs no dedicated route: notes ride along on the existing shift payloads
+// (GET /schedules/:id/shifts, and the shift returned by claim/admin-assign/admin-release).
+scheduleRouter.patch(
+    '/shifts/:id/note',
+    checkRole('SUPER_ADMIN', 'SCHEDULER_ADMIN'),
+    validateShiftNote,
+    updateShiftNote
+);
+scheduleRouter.delete(
+    '/shifts/:id/note',
+    checkRole('SUPER_ADMIN', 'SCHEDULER_ADMIN'),
+    deleteShiftNote
 );
