@@ -43,7 +43,7 @@ export const getUnhandledIntakeCount = async (req: Request, res: Response) => {
 
 export const createIntake = async (req: Request, res: Response) => {
     try {
-        const { callerName, phone, contactedOtherCenter, caseDescription, urgency, status } = req.body;
+        const { callerName, phone, contactedOtherCenter, caseDescription, urgency, status, reportedBy } = req.body;
         const intake = await intakeService.create({
             callerName,
             phone,
@@ -51,6 +51,7 @@ export const createIntake = async (req: Request, res: Response) => {
             caseDescription,
             urgency,
             status,
+            reportedBy,
         });
         return res.status(201).json({ success: true, data: intake });
     } catch (error) {

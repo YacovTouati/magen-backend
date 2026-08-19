@@ -13,4 +13,5 @@ export interface CreateIntakePayload {
     caseDescription: string;
     urgency: IntakeUrgency;
     status?: IntakeStatus;
+    reportedBy: string;
 }

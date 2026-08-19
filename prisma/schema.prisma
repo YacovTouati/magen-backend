@@ -174,6 +174,14 @@ model Intake {
   urgency              IntakeUrgency
   status               IntakeStatus  @default(NEW)
 
+  // "מי הכניס את הדיווח" — who entered this case (call-report submitter's name, or
+  // whoever an admin is creating this on behalf of for a manually-opened intake).
+  // Free text, not a User relation: must survive the reporting user being deleted,
+  // and a manually-created intake has no CallReport/authenticated submitter to key
+  // off of. DB default only backfills pre-existing rows migrated before this field
+  // existed — every creation path validates a real non-empty value at the API layer.
+  reportedBy String @default("ללא שם")
+
   callReportId Int?        @unique
   callReport   CallReport? @relation(fields: [callReportId], references: [id])
 
@@ -217,6 +225,10 @@ model CallReport {
   // was a nullable Boolean until "yes" needed to distinguish practical vs
   // principled reporting duty.
   reportingDuty                 String?
+  // "מי הכניס את הדיווח" — same field/reasoning as Intake.reportedBy, copied
+  // verbatim onto the auto-created Intake row (see ReportRepository.saveReportWithIntake,
+  // same convention already used there for callerName/phone/summaryNotes).
+  reportedBy                     String   @default("ללא שם")
   createdAt                     DateTime @default(now())
 
   createdById Int?

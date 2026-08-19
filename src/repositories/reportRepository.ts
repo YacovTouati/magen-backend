@@ -22,6 +22,7 @@ export class ReportRepository {
                     caseDescription: report.summaryNotes,
                     urgency: intakeFields.urgency,
                     status: 'NEW',
+                    reportedBy: report.reportedBy,
                     callReportId: report.id,
                 },
             });

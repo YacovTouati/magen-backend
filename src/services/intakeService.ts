@@ -27,6 +27,7 @@ export class IntakeService {
             caseDescription: payload.caseDescription,
             urgency: payload.urgency,
             status: payload.status ?? 'NEW',
+            reportedBy: payload.reportedBy,
         });
     }
 

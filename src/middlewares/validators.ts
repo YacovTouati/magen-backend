@@ -84,6 +84,10 @@ export const validateCallReport = [
     .isIn(['no', 'yes_practical', 'yes_principled'])
     .withMessage('השדה חובת דיווח אינו תקין'),
 
+  body('reportedBy')
+    .trim()
+    .notEmpty().withMessage('חובה להזין את שם מכניס הדיווח'),
+
   handleValidationErrors
 ];
 
@@ -218,6 +222,10 @@ export const validateCreateIntake = [
   body('status')
     .optional()
     .isIn(['NEW', 'NO_ANSWER', 'ACTIVE', 'CLOSED', 'LONG_TERM']).withMessage('סטטוס אינו תקין'),
+
+  body('reportedBy')
+    .trim()
+    .notEmpty().withMessage('חובה להזין את שם מכניס הדיווח'),
 
   handleValidationErrors
 ];

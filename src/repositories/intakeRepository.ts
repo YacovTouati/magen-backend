@@ -31,6 +31,7 @@ interface CreateIntakeData {
     caseDescription: string;
     urgency: IntakeUrgency;
     status: IntakeStatus;
+    reportedBy: string;
 }
 
 export class IntakeRepository {

@@ -21,5 +21,6 @@ export interface CallReport {
     isFamilyMemberOrAcquaintance: boolean;
     magenContactHistory: MagenContactHistory;
     reportingDuty?: ReportingDuty | null;
+    reportedBy: string;
     createdById?: number | null;
 }

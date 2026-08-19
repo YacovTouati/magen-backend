@@ -10,7 +10,7 @@ export const createCallReport = async (req: Request, res: Response) => {
             callDuration, callerType, callPurpose, summaryNotes,
             callerName, phone, email, region, gender, sector,
             receivedSupportAtOtherCenter, isFamilyMemberOrAcquaintance, magenContactHistory,
-            reportingDuty
+            reportingDuty, reportedBy
         } = req.body;
 
         // העברת האובייקט המלא לשכבת הלוגיקה (Service)
@@ -29,6 +29,7 @@ export const createCallReport = async (req: Request, res: Response) => {
             isFamilyMemberOrAcquaintance,
             magenContactHistory,
             reportingDuty,
+            reportedBy,
             createdById: req.user!.id
         });
 
