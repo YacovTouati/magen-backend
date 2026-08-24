@@ -7,6 +7,7 @@ import {
     inviteUser,
     listInvitations,
     updateIntakeAlerts,
+    updateUser,
     updateUserRole,
 } from '../controllers/userController';
 import { authenticate, checkRole } from '../middlewares/auth';
@@ -15,6 +16,7 @@ import {
     validateChangePassword,
     validateInviteUser,
     validateUpdateIntakeAlerts,
+    validateUpdateUser,
     validateUpdateUserRole,
 } from '../middlewares/validators';
 
@@ -34,6 +36,11 @@ userRouter.post('/users/invite', checkRole('SUPER_ADMIN'), validateInviteUser, i
 userRouter.get('/users/invitations', checkRole('SUPER_ADMIN'), listInvitations);
 userRouter.delete('/users/invitations/:id', checkRole('SUPER_ADMIN'), deleteInvitation);
 userRouter.patch('/users/:id/role', checkRole('SUPER_ADMIN'), validateUpdateUserRole, updateUserRole);
+
+// General profile edit (name/email/role together) — SUPER_ADMIN-only, same tier as
+// every other account-management route in this file. /users/:id/role above stays as
+// its own narrower endpoint too; this one doesn't replace it.
+userRouter.patch('/users/:id', checkRole('SUPER_ADMIN'), validateUpdateUser, updateUser);
 
 // SUPER_ADMIN-only, same tier as role management above — and the field itself is
 // only ever settable on a SUPER_ADMIN target too (enforced in userService/userRepository).

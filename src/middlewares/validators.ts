@@ -174,6 +174,27 @@ export const validateUpdateUserRole = [
   handleValidationErrors
 ];
 
+// 🛡️ חוקי אימות לעריכת פרטי משתמש (שם / מייל / תפקיד) — כל שדה אופציונלי (עדכון חלקי),
+// אך אם הוזן חייב להיות תקין. ייחודיות המייל נבדקת בשכבת ה-Service, לא כאן.
+export const validateUpdateUser = [
+  body('name')
+    .optional()
+    .trim()
+    .notEmpty().withMessage('שם המשתמש אינו יכול להיות ריק'),
+
+  body('email')
+    .optional()
+    .trim()
+    .isEmail().withMessage('כתובת המייל שהוזנה אינה תקינה')
+    .normalizeEmail(),
+
+  body('role')
+    .optional()
+    .isIn(['SUPER_ADMIN', 'INTAKE_ADMIN', 'SCHEDULER_ADMIN', 'VOLUNTEER']).withMessage('תפקיד המשתמש אינו תקין'),
+
+  handleValidationErrors
+];
+
 // 🛡️ חוקי אימות להפעלת/כיבוי התראות מייל על תיק אינטייק חדש
 export const validateUpdateIntakeAlerts = [
   body('receiveIntakeAlerts')

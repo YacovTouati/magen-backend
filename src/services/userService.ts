@@ -1,7 +1,14 @@
 import bcrypt from 'bcrypt';
+import { Prisma } from '../generated/prisma/client';
 import { HttpError } from '../errors/httpError';
 import { UserRepository } from '../repositories/userRepository';
 import { UserRole } from '../types/user';
+
+interface UpdateUserDetailsPayload {
+    name?: string;
+    email?: string;
+    role?: UserRole;
+}
 
 export class UserService {
     private userRepository = new UserRepository();
@@ -16,6 +23,34 @@ export class UserService {
 
     async updateUserRole(id: number, role: UserRole) {
         return this.userRepository.updateRole(id, role);
+    }
+
+    // Pre-checks email uniqueness (excluding the user's own current row, so
+    // re-submitting an unchanged email isn't rejected as "taken") and still
+    // catches P2002 from the write itself as a defense against a concurrent
+    // registration/edit winning the same email in the gap between the two —
+    // same belt-and-suspenders pattern already used at AuthService.register.
+    async updateUserDetails(id: number, payload: UpdateUserDetailsPayload) {
+        if (payload.email) {
+            const existing = await this.userRepository.findByEmail(payload.email);
+            if (existing && existing.id !== id) {
+                throw new HttpError(409, 'כתובת המייל כבר בשימוש על ידי משתמש אחר');
+            }
+        }
+
+        try {
+            return await this.userRepository.updateDetails(id, payload);
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === 'P2025') {
+                    throw new HttpError(404, 'משתמש לא נמצא');
+                }
+                if (error.code === 'P2002') {
+                    throw new HttpError(409, 'כתובת המייל כבר בשימוש על ידי משתמש אחר');
+                }
+            }
+            throw error;
+        }
     }
 
     // Refuses to set this on any role other than SUPER_ADMIN — the atomic update

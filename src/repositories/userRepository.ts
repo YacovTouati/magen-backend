@@ -54,6 +54,17 @@ export class UserRepository {
         });
     }
 
+    // Partial update — only the fields present in `data` are touched. Email
+    // uniqueness is checked by the service before this runs; P2002 here (email
+    // race) and P2025 (no such user) are both left to bubble up to the service.
+    async updateDetails(id: number, data: Partial<{ name: string; email: string; role: UserRole }>) {
+        return prisma.user.update({
+            where: { id },
+            data,
+            select: publicUserSelect,
+        });
+    }
+
     // Atomic: the role guard lives in the WHERE clause itself, not a separate
     // check-then-write — the field is only ever meaningful for SUPER_ADMIN (see
     // schema.prisma), so a row that doesn't match that role affects 0 rows rather
