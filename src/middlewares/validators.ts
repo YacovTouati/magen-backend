@@ -42,10 +42,10 @@ export const validateCallReport = [
     .trim()
     .notEmpty().withMessage('חובה להזין שם פונה (ניתן להשתמש בשם בדוי)'),
 
+  // אופציונלי — דוח יכול להישמר גם אם שדה הטלפון נותר ריק; אם הוזן, חייב להיות תקין
   body('phone')
+    .optional({ nullable: true, checkFalsy: true })
     .trim()
-    .notEmpty().withMessage('חובה להזין מספר טלפון')
-    .bail()
     .matches(PHONE_PATTERN).withMessage(PHONE_INVALID_MESSAGE),
 
   // אופציונלי — דוח יכול להישמר גם אם שדה המייל נותר ריק
@@ -210,10 +210,10 @@ export const validateCreateIntake = [
     .trim()
     .notEmpty().withMessage('חובה להזין שם פונה'),
 
+  // אופציונלי — תיק יכול להיפתח גם אם שדה הטלפון נותר ריק; אם הוזן, חייב להיות תקין
   body('phone')
+    .optional({ nullable: true, checkFalsy: true })
     .trim()
-    .notEmpty().withMessage('חובה להזין מספר טלפון')
-    .bail()
     .matches(PHONE_PATTERN).withMessage(PHONE_INVALID_MESSAGE),
 
   body('contactedOtherCenter')

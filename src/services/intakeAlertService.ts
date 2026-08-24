@@ -4,7 +4,7 @@ import { EmailService } from './emailService';
 interface IntakeAlertData {
     id: number;
     callerName: string;
-    phone: string;
+    phone: string | null;
     reportedBy: string;
 }
 

@@ -46,7 +46,7 @@ export const createIntake = async (req: Request, res: Response) => {
         const { callerName, phone, contactedOtherCenter, caseDescription, urgency, status, reportedBy } = req.body;
         const intake = await intakeService.create({
             callerName,
-            phone,
+            phone: phone ? phone : null, // "" left by an optional/blank field stores as NULL, not ""
             contactedOtherCenter,
             caseDescription,
             urgency,

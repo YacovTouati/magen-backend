@@ -26,7 +26,7 @@ const UNHANDLED_STATUSES: IntakeStatus[] = ['NEW'];
 
 interface CreateIntakeData {
     callerName: string;
-    phone: string;
+    phone: string | null;
     contactedOtherCenter: string;
     caseDescription: string;
     urgency: IntakeUrgency;

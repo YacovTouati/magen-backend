@@ -63,7 +63,7 @@ export class EmailService {
         );
     }
 
-    async sendIntakeAlertEmail(email: string, intake: { id: number; callerName: string; phone: string; reportedBy: string }): Promise<void> {
+    async sendIntakeAlertEmail(email: string, intake: { id: number; callerName: string; phone: string | null; reportedBy: string }): Promise<void> {
         const link = `${FRONTEND_URL}/intakes`;
         const html = wrapRtlEmail(
             'תיק אינטייק חדש נפתח',
@@ -73,7 +73,7 @@ export class EmailService {
              <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
                 <tr><td style="padding: 4px 0; color: #6b7280; font-size: 13px;">מספר תיק:</td><td style="padding: 4px 0; color: #111827; font-size: 13px; font-weight: bold;">#${intake.id}</td></tr>
                 <tr><td style="padding: 4px 0; color: #6b7280; font-size: 13px;">שם הפונה:</td><td style="padding: 4px 0; color: #111827; font-size: 13px; font-weight: bold;">${intake.callerName}</td></tr>
-                <tr><td style="padding: 4px 0; color: #6b7280; font-size: 13px;">טלפון:</td><td style="padding: 4px 0; color: #111827; font-size: 13px; font-weight: bold;">${intake.phone}</td></tr>
+                <tr><td style="padding: 4px 0; color: #6b7280; font-size: 13px;">טלפון:</td><td style="padding: 4px 0; color: #111827; font-size: 13px; font-weight: bold;">${intake.phone || 'לא צוין'}</td></tr>
                 <tr><td style="padding: 4px 0; color: #6b7280; font-size: 13px;">מי הכניס את הדיווח:</td><td style="padding: 4px 0; color: #111827; font-size: 13px; font-weight: bold;">${intake.reportedBy}</td></tr>
              </table>` + linkButtonHtml(link, 'צפייה בתיק במערכת', '#1e3a8a')
         );

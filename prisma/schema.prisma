@@ -174,7 +174,7 @@ enum IntakeStatus {
 model Intake {
   id                   Int           @id @default(autoincrement())
   callerName           String
-  phone                String
+  phone                String?
   contactedOtherCenter String
   caseDescription      String
   urgency              IntakeUrgency
@@ -213,7 +213,7 @@ model CallReport {
   callPurpose                   String
   summaryNotes                  String
   callerName                    String
-  phone                         String
+  phone                         String?
   email                         String?
   region                        String
   gender                        String

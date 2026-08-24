@@ -12,7 +12,7 @@ export interface CallReport {
     callPurpose: CallPurpose;
     summaryNotes: string;
     callerName: string;
-    phone: string;
+    phone: string | null;
     email: string | null;
     region: string;
     gender: Gender;

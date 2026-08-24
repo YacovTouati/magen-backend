@@ -20,7 +20,7 @@ export const createCallReport = async (req: Request, res: Response) => {
             callPurpose,
             summaryNotes,
             callerName,
-            phone,
+            phone: phone ? phone : null, // "" left by an optional/blank form field stores as NULL, not ""
             email: email ? email : null, // "" left by an optional/blank form field stores as NULL, not ""
             region,
             gender,

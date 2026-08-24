@@ -8,7 +8,7 @@ export interface UpdateIntakeStatusPayload {
 
 export interface CreateIntakePayload {
     callerName: string;
-    phone: string;
+    phone: string | null;
     contactedOtherCenter: string;
     caseDescription: string;
     urgency: IntakeUrgency;
