@@ -1,6 +1,7 @@
 import { Prisma } from '../generated/prisma/client';
 import { HttpError } from '../errors/httpError';
 import { IntakeRepository } from '../repositories/intakeRepository';
+import { IntakeAlertService } from './intakeAlertService';
 import { CreateIntakePayload, IntakeStatus } from '../types/intake';
 
 const EXTENSION_DAYS = 7;
@@ -10,6 +11,7 @@ const isNotFoundError = (error: unknown): error is Prisma.PrismaClientKnownReque
 
 export class IntakeService {
     private intakeRepository = new IntakeRepository();
+    private intakeAlertService = new IntakeAlertService();
 
     async getAllIntakes() {
         return this.intakeRepository.findAll();
@@ -20,7 +22,7 @@ export class IntakeService {
     }
 
     async create(payload: CreateIntakePayload) {
-        return this.intakeRepository.create({
+        const intake = await this.intakeRepository.create({
             callerName: payload.callerName,
             phone: payload.phone,
             contactedOtherCenter: payload.contactedOtherCenter,
@@ -29,6 +31,12 @@ export class IntakeService {
             status: payload.status ?? 'NEW',
             reportedBy: payload.reportedBy,
         });
+
+        // Fire-and-forget — never awaited, so a slow/failing notification email
+        // can't delay or fail this response (see IntakeAlertService's own comment).
+        void this.intakeAlertService.notifyNewIntake(intake);
+
+        return intake;
     }
 
     async updateStatus(id: number, status: IntakeStatus) {

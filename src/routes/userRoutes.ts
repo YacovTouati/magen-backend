@@ -6,11 +6,17 @@ import {
     getUsers,
     inviteUser,
     listInvitations,
+    updateIntakeAlerts,
     updateUserRole,
 } from '../controllers/userController';
 import { authenticate, checkRole } from '../middlewares/auth';
 import { authActionLimiter } from '../middlewares/rateLimiters';
-import { validateChangePassword, validateInviteUser, validateUpdateUserRole } from '../middlewares/validators';
+import {
+    validateChangePassword,
+    validateInviteUser,
+    validateUpdateIntakeAlerts,
+    validateUpdateUserRole,
+} from '../middlewares/validators';
 
 export const userRouter = Router();
 
@@ -28,6 +34,15 @@ userRouter.post('/users/invite', checkRole('SUPER_ADMIN'), validateInviteUser, i
 userRouter.get('/users/invitations', checkRole('SUPER_ADMIN'), listInvitations);
 userRouter.delete('/users/invitations/:id', checkRole('SUPER_ADMIN'), deleteInvitation);
 userRouter.patch('/users/:id/role', checkRole('SUPER_ADMIN'), validateUpdateUserRole, updateUserRole);
+
+// SUPER_ADMIN-only, same tier as role management above — and the field itself is
+// only ever settable on a SUPER_ADMIN target too (enforced in userService/userRepository).
+userRouter.patch(
+    '/users/:id/intake-alerts',
+    checkRole('SUPER_ADMIN'),
+    validateUpdateIntakeAlerts,
+    updateIntakeAlerts
+);
 userRouter.delete('/users/:id', checkRole('SUPER_ADMIN'), deleteUser);
 
 // Not under /users — any authenticated user changes their own password, no

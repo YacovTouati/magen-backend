@@ -174,6 +174,14 @@ export const validateUpdateUserRole = [
   handleValidationErrors
 ];
 
+// 🛡️ חוקי אימות להפעלת/כיבוי התראות מייל על תיק אינטייק חדש
+export const validateUpdateIntakeAlerts = [
+  body('receiveIntakeAlerts')
+    .isBoolean().withMessage('השדה receiveIntakeAlerts חייב להיות בוליאני'),
+
+  handleValidationErrors
+];
+
 // 🛡️ חוקי אימות לכניסת משתמש (login)
 export const validateLogin = [
   body('email')

@@ -63,6 +63,26 @@ export class EmailService {
         );
     }
 
+    async sendIntakeAlertEmail(email: string, intake: { id: number; callerName: string; phone: string; reportedBy: string }): Promise<void> {
+        const link = `${FRONTEND_URL}/intakes`;
+        const html = wrapRtlEmail(
+            'תיק אינטייק חדש נפתח',
+            `<p style="color: #374151; font-size: 15px; line-height: 1.6;">
+                נפתח תיק אינטייק חדש במערכת מגן:
+             </p>
+             <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+                <tr><td style="padding: 4px 0; color: #6b7280; font-size: 13px;">מספר תיק:</td><td style="padding: 4px 0; color: #111827; font-size: 13px; font-weight: bold;">#${intake.id}</td></tr>
+                <tr><td style="padding: 4px 0; color: #6b7280; font-size: 13px;">שם הפונה:</td><td style="padding: 4px 0; color: #111827; font-size: 13px; font-weight: bold;">${intake.callerName}</td></tr>
+                <tr><td style="padding: 4px 0; color: #6b7280; font-size: 13px;">טלפון:</td><td style="padding: 4px 0; color: #111827; font-size: 13px; font-weight: bold;">${intake.phone}</td></tr>
+                <tr><td style="padding: 4px 0; color: #6b7280; font-size: 13px;">מי הכניס את הדיווח:</td><td style="padding: 4px 0; color: #111827; font-size: 13px; font-weight: bold;">${intake.reportedBy}</td></tr>
+             </table>` + linkButtonHtml(link, 'צפייה בתיק במערכת', '#1e3a8a')
+        );
+
+        await this.send(email, `תיק אינטייק חדש #${intake.id} — מגן`, html, () =>
+            console.log(`📧 [EMAIL STUB — no provider configured] Intake alert for ${email}: intake #${intake.id}, ${link}`)
+        );
+    }
+
     // Never throws — a missing key, a bad key, or a Resend-side failure all
     // fall back to logging rather than bubbling up. Callers (forgot-password,
     // invite) already treat "email didn't actually arrive" as a legitimate

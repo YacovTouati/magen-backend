@@ -31,6 +31,12 @@ model User {
   phone    String?
   role     UserRole @default(VOLUNTEER)
 
+  // Opt-in "email me on every new Intake" preference — meaningful only for
+  // SUPER_ADMIN (see PATCH /users/:id/intake-alerts, which refuses to set this
+  // on any other role): a stray true on a non-admin is harmless since the
+  // new-intake notifier only ever queries role: SUPER_ADMIN, receiveIntakeAlerts: true.
+  receiveIntakeAlerts Boolean @default(false)
+
   // Single active reset token at a time — a fresh forgot-password request
   // simply overwrites these, implicitly invalidating whatever was pending.
   // Stores a SHA-256 hash, never the raw token (see src/utils/tokens.ts) —

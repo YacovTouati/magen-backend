@@ -7,6 +7,7 @@ const publicUserSelect = {
     name: true,
     phone: true,
     role: true,
+    receiveIntakeAlerts: true,
     createdAt: true,
 } as const;
 
@@ -21,6 +22,13 @@ export class UserRepository {
 
     async findById(id: number) {
         return prisma.user.findUnique({ where: { id } });
+    }
+
+    // Same row as findById, minus the password hash — for responses that echo
+    // the user back to the client (findById itself stays "full row" since its
+    // other callers need the hash, e.g. changePassword's bcrypt.compare).
+    async findByIdPublic(id: number) {
+        return prisma.user.findUnique({ where: { id }, select: publicUserSelect });
     }
 
     // Only reached by registration, once the invite token has already been
@@ -43,6 +51,27 @@ export class UserRepository {
             where: { id },
             data: { role },
             select: publicUserSelect,
+        });
+    }
+
+    // Atomic: the role guard lives in the WHERE clause itself, not a separate
+    // check-then-write — the field is only ever meaningful for SUPER_ADMIN (see
+    // schema.prisma), so a row that doesn't match that role affects 0 rows rather
+    // than silently succeeding. The service distinguishes "no such user" from
+    // "user exists but isn't SUPER_ADMIN" with a follow-up lookup on count === 0.
+    async updateIntakeAlertsIfSuperAdmin(id: number, receiveIntakeAlerts: boolean) {
+        return prisma.user.updateMany({
+            where: { id, role: 'SUPER_ADMIN' },
+            data: { receiveIntakeAlerts },
+        });
+    }
+
+    // Recipients for the new-intake notifier (see intakeAlertService.ts) — only
+    // ever SUPER_ADMIN rows, matching the same restriction the update above enforces.
+    async findSuperAdminsWithIntakeAlerts() {
+        return prisma.user.findMany({
+            where: { role: 'SUPER_ADMIN', receiveIntakeAlerts: true },
+            select: { email: true },
         });
     }
 

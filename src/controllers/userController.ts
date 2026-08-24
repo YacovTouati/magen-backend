@@ -80,6 +80,20 @@ export const updateUserRole = async (req: Request, res: Response) => {
     }
 };
 
+export const updateIntakeAlerts = async (req: Request, res: Response) => {
+    const userId = Number(req.params.id);
+    if (!Number.isInteger(userId)) {
+        return res.status(400).json({ success: false, message: 'מזהה משתמש אינו תקין' });
+    }
+
+    try {
+        const user = await userService.updateIntakeAlerts(userId, req.body.receiveIntakeAlerts);
+        return res.status(200).json({ success: true, data: user });
+    } catch (error) {
+        return handleError(res, error);
+    }
+};
+
 export const deleteUser = async (req: Request, res: Response) => {
     const userId = Number(req.params.id);
     if (!Number.isInteger(userId)) {
