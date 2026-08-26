@@ -14,4 +14,28 @@ export class AnalyticsRepository {
             _count: { _all: true },
         });
     }
+
+    // Backs both the monthly analytics aggregation and the CSV export — one shared
+    // query/shape rather than two slightly different ones, since export is really
+    // just "the same monthly intake rows, unaggregated."
+    async findIntakesByMonth(year: number, month: number) {
+        const start = new Date(Date.UTC(year, month - 1, 1));
+        const end = new Date(Date.UTC(year, month, 1));
+
+        return prisma.intake.findMany({
+            where: { createdAt: { gte: start, lt: end } },
+            select: {
+                id: true,
+                callerName: true,
+                phone: true,
+                status: true,
+                reportedBy: true,
+                caseDescription: true,
+                createdAt: true,
+                updatedAt: true,
+                callReport: { select: { email: true, callPurpose: true } },
+            },
+            orderBy: { createdAt: 'asc' },
+        });
+    }
 }

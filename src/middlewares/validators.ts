@@ -270,6 +270,21 @@ export const validateCreateSchedule = [
   handleValidationErrors
 ];
 
+// 🛡️ חוקי אימות לדוחות אנליטיקה חודשיים (סטטיסטיקות + ייצוא CSV) לפי חודש ושנה
+export const validateMonthlyAnalyticsLookup = [
+  query('month')
+    .isInt({ min: 1, max: 12 }).withMessage('חודש אינו תקין (נדרש ערך בין 1 ל-12)'),
+
+  query('year')
+    .isInt({ min: 2020, max: 2100 }).withMessage('שנה אינה תקינה'),
+
+  query('format')
+    .optional()
+    .isIn(['csv']).withMessage('פורמט הייצוא הנתמך היחיד הוא csv'),
+
+  handleValidationErrors
+];
+
 // 🛡️ חוקי אימות לחיפוש לוח משמרות לפי חודש ושנה
 export const validateScheduleLookup = [
   query('month')
