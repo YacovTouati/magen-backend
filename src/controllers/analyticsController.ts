@@ -4,10 +4,11 @@ import { buildCsv } from '../utils/csv';
 
 const analyticsService = new AnalyticsService();
 
-// Hebrew display labels for IntakeStatus — duplicated from the frontend's own
-// STATUS_LABELS (IntakeAlertsComponent / IntakesListComponent) rather than shared,
-// since this backend has no existing shared-label utility; keep these two in sync
-// if a status is ever added/renamed.
+// Hebrew display labels — duplicated from the frontend's own label maps
+// (src/app/shared/intake-labels.ts) rather than shared, since this backend has no
+// existing shared-label utility; keep these in sync if a value is ever added/renamed.
+// Falls through to the raw value for anything unrecognized, including the
+// analytics service's own 'לא צוין' bucket (already Hebrew, needs no translation).
 const STATUS_LABELS: Record<string, string> = {
     NEW: 'חדש',
     NO_ANSWER: 'לא ענה - לנסות שוב',
@@ -16,15 +17,56 @@ const STATUS_LABELS: Record<string, string> = {
     LONG_TERM: 'המשך לטיפול ארוך',
 };
 
+const CALLER_TYPE_LABELS: Record<string, string> = {
+    victim: 'נפגע/ת ישיר/ה',
+    family: 'בן/בת משפחה',
+    friend: 'חבר/ה או מכר/ה',
+    unknown: 'אנונימי',
+};
+
+const CALL_PURPOSE_LABELS: Record<string, string> = {
+    counseling: 'ייעוץ ותמיכה רגשית',
+    crisis: 'מצב משבר קריטי',
+    coercion: 'דיווח על כפייה או פגיעה',
+};
+
+const RECEIVED_SUPPORT_LABELS: Record<string, string> = {
+    yes: 'כן',
+    no: 'לא',
+    unknown: 'לא ידוע',
+};
+
+const MAGEN_CONTACT_HISTORY_LABELS: Record<string, string> = {
+    first_time: 'פעם ראשונה',
+    past: 'פנה בעבר',
+    dont_remember: 'לא זוכר',
+};
+
+const REPORTING_DUTY_LABELS: Record<string, string> = {
+    no: 'לא',
+    yes_practical: 'כן מעשי',
+    yes_principled: 'כן עקרוני',
+};
+
+const labelOrRaw = (labels: Record<string, string>, value: string | null): string => {
+    if (!value) {
+        return '-';
+    }
+    return labels[value] ?? value;
+};
+
 const EXPORT_HEADERS = [
     'תאריך',
-    'מזהה אינטייק',
     'שם הפונה',
-    'טלפון',
-    'אימייל',
+    'סוג פונה',
+    'מטרת שיחה',
+    'אזור בארץ',
+    'ליווי במרכז אחר',
+    'פנה למגן בעבר',
+    'חובת דיווח',
     'מי הכניס את הדיווח',
     'סטטוס',
-    'תיאור/נושא',
+    'תיאור/תוכן',
 ];
 
 const handleError = (res: Response, error: unknown) => {
@@ -60,10 +102,13 @@ export const exportMonthlyIntakes = async (req: Request, res: Response) => {
 
         const csvRows = rows.map((row) => [
             row.createdAt.toISOString().slice(0, 10),
-            String(row.id),
             row.callerName,
-            row.phone ?? '',
-            row.email ?? '',
+            labelOrRaw(CALLER_TYPE_LABELS, row.callerType),
+            labelOrRaw(CALL_PURPOSE_LABELS, row.callPurpose),
+            row.region ?? '-',
+            labelOrRaw(RECEIVED_SUPPORT_LABELS, row.receivedSupportAtOtherCenter),
+            labelOrRaw(MAGEN_CONTACT_HISTORY_LABELS, row.magenContactHistory),
+            labelOrRaw(REPORTING_DUTY_LABELS, row.reportingDuty),
             row.reportedBy,
             STATUS_LABELS[row.status] ?? row.status,
             row.caseDescription,
