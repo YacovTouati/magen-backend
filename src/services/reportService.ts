@@ -3,11 +3,16 @@ import { IntakeAlertService } from './intakeAlertService';
 import { CallReport, CallPurpose, ReceivedSupportAtOtherCenter } from '../types/report';
 import { IntakeUrgency } from '../types/intake';
 
-// שיחת מצוקה נכנסת כתיק בעדיפות קריטית; כפייה כגבוהה; ייעוץ כבינונית — עד שתהיה שדה ייעודי בטופס
+// Updated severity hierarchy: מצב חירום אקוטי היא הדחיפות הגבוהה ביותר; ייעוץ ותמיכה
+// רגשית גבוהה; הפנייה לטיפול/ליווי משפטי בינונית; מיצוי זכויות ואחר/מספר נושאים סטנדרטית
+// (LOW) — עד שתהיה שדה ייעודי בטופס.
 const CALL_PURPOSE_TO_URGENCY: Record<CallPurpose, IntakeUrgency> = {
     crisis: 'CRITICAL',
-    coercion: 'HIGH',
-    counseling: 'MEDIUM',
+    counseling: 'HIGH',
+    referral: 'MEDIUM',
+    legal_process: 'MEDIUM',
+    rights_advocacy: 'LOW',
+    other: 'LOW',
 };
 
 const RECEIVED_SUPPORT_TO_HEBREW: Record<ReceivedSupportAtOtherCenter, string> = {

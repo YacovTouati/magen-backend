@@ -1,5 +1,8 @@
-export type CallerType = 'victim' | 'family' | 'friend' | 'unknown';
-export type CallPurpose = 'counseling' | 'coercion' | 'crisis';
+export type CallerType = 'victim' | 'family' | 'friend' | 'unknown' | 'general_inquiry';
+// 'coercion' was removed from the selectable set — no longer valid on new submissions
+// (see validators.ts), but historical CallReport rows may still hold it; analytics/CSV
+// label maps keep an explicit legacy entry so those old rows still render in Hebrew.
+export type CallPurpose = 'counseling' | 'referral' | 'legal_process' | 'rights_advocacy' | 'crisis' | 'other';
 export type Gender = 'male' | 'female' | 'other' | 'unknown';
 export type Sector = 'secular' | 'traditional' | 'religious' | 'ultra_orthodox' | 'arab' | 'other';
 export type MagenContactHistory = 'first_time' | 'past' | 'dont_remember';
