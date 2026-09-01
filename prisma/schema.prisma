@@ -223,7 +223,6 @@ model CallReport {
   // 'yes' | 'no' | 'unknown' — was a Boolean until a third "unknown" option was
   // needed; validated at the API layer, same convention as region/gender/sector.
   receivedSupportAtOtherCenter  String
-  isFamilyMemberOrAcquaintance  Boolean
   // 'first_time' | 'past' | 'dont_remember' — validated at the API layer, same
   // convention as region/gender/sector: a Prisma String, not a Prisma enum.
   magenContactHistory           String

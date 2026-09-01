@@ -9,7 +9,7 @@ export const createCallReport = async (req: Request, res: Response) => {
         const {
             callDuration, callerType, callPurpose, summaryNotes,
             callerName, phone, email, region, gender, sector,
-            receivedSupportAtOtherCenter, isFamilyMemberOrAcquaintance, magenContactHistory,
+            receivedSupportAtOtherCenter, magenContactHistory,
             reportingDuty, reportedBy
         } = req.body;
 
@@ -26,7 +26,6 @@ export const createCallReport = async (req: Request, res: Response) => {
             gender,
             sector,
             receivedSupportAtOtherCenter,
-            isFamilyMemberOrAcquaintance,
             magenContactHistory,
             reportingDuty,
             reportedBy,

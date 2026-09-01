@@ -73,9 +73,6 @@ export const validateCallReport = [
     .isIn(['yes', 'no', 'unknown'])
     .withMessage('השדה האם קיבל ליווי במרכז סיוע אחר אינו תקין'),
 
-  body('isFamilyMemberOrAcquaintance')
-    .isBoolean().withMessage('השדה האם מכר או בן משפחה של נפגע חייב להיות כן או לא (בוליאני)'),
-
   body('magenContactHistory')
     .isIn(['first_time', 'past', 'dont_remember'])
     .withMessage('היסטוריית הפנייה למגן אינה תקינה'),

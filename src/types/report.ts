@@ -21,7 +21,6 @@ export interface CallReport {
     gender: Gender;
     sector: Sector;
     receivedSupportAtOtherCenter: ReceivedSupportAtOtherCenter;
-    isFamilyMemberOrAcquaintance: boolean;
     magenContactHistory: MagenContactHistory;
     reportingDuty?: ReportingDuty | null;
     reportedBy: string;

@@ -6,7 +6,7 @@ import { IntakeStatus, IntakeUrgency } from '../types/intake';
 // magenContactHistory (prior contact with Magen), callerType (applicant type),
 // and summaryNotes (full call content, alongside Intake.caseDescription itself).
 // Deliberately still NOT `callReport: true` — gender, sector,
-// receivedSupportAtOtherCenter, isFamilyMemberOrAcquaintance, callDuration,
+// receivedSupportAtOtherCenter, callDuration,
 // callPurpose etc. have no consumer here and stay excluded, same reasoning as
 // before (see the earlier over-fetch trim this select already went through).
 const callReportListSelect = {
