@@ -1,6 +1,7 @@
 import { Prisma } from '../generated/prisma/client';
 import { HttpError } from '../errors/httpError';
 import { ScheduleRepository } from '../repositories/scheduleRepository';
+import { isShabbatBlockedShift } from '../utils/shabbat';
 
 export class ScheduleService {
     private scheduleRepository = new ScheduleRepository();
@@ -48,6 +49,14 @@ export class ScheduleService {
     }
 
     async claimShift(shiftId: number, volunteerId: number) {
+        const shift = await this.scheduleRepository.findShiftById(shiftId);
+        if (!shift) {
+            throw new HttpError(404, 'משמרת לא נמצאה');
+        }
+        if (isShabbatBlockedShift(shift.date, shift.type)) {
+            throw new HttpError(400, 'לא ניתן לשבץ משמרת בשבת — שבת מנוחה 🕯️');
+        }
+
         const result = await this.scheduleRepository.claimShiftIfAvailable(shiftId, volunteerId);
         if (result.count === 0) {
             // Race lost, doesn't exist, or the schedule isn't open yet — the atomic
@@ -84,6 +93,14 @@ export class ScheduleService {
     // overwrite one already claimed by another volunteer. P2003 means the FK
     // target (volunteerId) doesn't exist; anything else is genuinely unexpected.
     async adminAssign(shiftId: number, volunteerId: number) {
+        const shift = await this.scheduleRepository.findShiftById(shiftId);
+        if (!shift) {
+            throw new HttpError(404, 'משמרת לא נמצאה');
+        }
+        if (isShabbatBlockedShift(shift.date, shift.type)) {
+            throw new HttpError(400, 'לא ניתן לשבץ משמרת בשבת — שבת מנוחה 🕯️');
+        }
+
         try {
             const result = await this.scheduleRepository.adminAssignShift(shiftId, volunteerId);
             if (result.count === 0) {
