@@ -2,9 +2,45 @@ import { Prisma } from '../generated/prisma/client';
 import { HttpError } from '../errors/httpError';
 import { ScheduleRepository } from '../repositories/scheduleRepository';
 import { isShabbatBlockedShift } from '../utils/shabbat';
+import { getHolidayBlock, getObservance, HolidayInfo } from '../utils/holidays';
+import { ShiftType } from '../types/schedule';
+
+// A Yom Tov can coincide with Shabbat (e.g. Sukkot I falling on a Saturday) — both are
+// checked and, when they overlap, combined into one label/emoji rather than letting
+// Shabbat win silently and hide the holiday entirely. Neither ever pushes the other to
+// an adjacent day; they just both apply to the same blocked slot.
+async function getBlockInfo(date: Date, type: ShiftType): Promise<HolidayInfo | { emoji: string; label: string } | null> {
+    const isShabbat = isShabbatBlockedShift(date, type);
+    const holiday = await getHolidayBlock(date, type);
+
+    if (isShabbat && holiday) {
+        return { emoji: `🕯️${holiday.emoji}`, label: `שבת ו${holiday.label}` };
+    }
+    if (isShabbat) {
+        return { emoji: '🕯️', label: 'שבת מנוחה' };
+    }
+    return holiday;
+}
 
 export class ScheduleService {
     private scheduleRepository = new ScheduleRepository();
+
+    private async enrichShift<T extends { date: Date; type: ShiftType } | null>(shift: T) {
+        if (!shift) {
+            return shift;
+        }
+        const holiday = await getBlockInfo(shift.date, shift.type);
+        const observance = await getObservance(shift.date);
+        return { ...shift, holiday, observance };
+    }
+
+    private async enrichSchedule<T extends { shifts: { date: Date; type: ShiftType }[] } | null>(schedule: T) {
+        if (!schedule) {
+            return schedule;
+        }
+        const shifts = await Promise.all(schedule.shifts.map((s) => this.enrichShift(s)));
+        return { ...schedule, shifts };
+    }
 
     async createSchedule(month: number, year: number) {
         try {
@@ -33,7 +69,7 @@ export class ScheduleService {
         if (!schedule) {
             throw new HttpError(404, 'לוח משמרות לא נמצא');
         }
-        return schedule;
+        return this.enrichSchedule(schedule);
     }
 
     async publish(scheduleId: number) {
@@ -53,8 +89,9 @@ export class ScheduleService {
         if (!shift) {
             throw new HttpError(404, 'משמרת לא נמצאה');
         }
-        if (isShabbatBlockedShift(shift.date, shift.type)) {
-            throw new HttpError(400, 'לא ניתן לשבץ משמרת בשבת — שבת מנוחה 🕯️');
+        const block = await getBlockInfo(shift.date, shift.type);
+        if (block) {
+            throw new HttpError(400, `לא ניתן לשבץ משמרת ב${block.label} ${block.emoji}`);
         }
 
         const result = await this.scheduleRepository.claimShiftIfAvailable(shiftId, volunteerId);
@@ -71,7 +108,7 @@ export class ScheduleService {
             }
             throw new HttpError(400, 'המשמרת כבר נתפסה על ידי מתנדב אחר');
         }
-        return this.scheduleRepository.findShiftById(shiftId);
+        return this.enrichShift(await this.scheduleRepository.findShiftById(shiftId));
     }
 
     // The only code path that can ever move a shift out of LOCKED. Role
@@ -86,19 +123,22 @@ export class ScheduleService {
             }
             throw new HttpError(400, 'המשמרת אינה נעולה כרגע');
         }
-        return this.scheduleRepository.findShiftById(shiftId);
+        return this.enrichShift(await this.scheduleRepository.findShiftById(shiftId));
     }
 
     // Bypasses the OPEN-only guard entirely — admin can assign a free shift or
     // overwrite one already claimed by another volunteer. P2003 means the FK
     // target (volunteerId) doesn't exist; anything else is genuinely unexpected.
+    // Shabbat/Yom Tov blocking still applies even here — this is organizational
+    // policy, not a scheduling conflict an admin should be able to override.
     async adminAssign(shiftId: number, volunteerId: number) {
         const shift = await this.scheduleRepository.findShiftById(shiftId);
         if (!shift) {
             throw new HttpError(404, 'משמרת לא נמצאה');
         }
-        if (isShabbatBlockedShift(shift.date, shift.type)) {
-            throw new HttpError(400, 'לא ניתן לשבץ משמרת בשבת — שבת מנוחה 🕯️');
+        const block = await getBlockInfo(shift.date, shift.type);
+        if (block) {
+            throw new HttpError(400, `לא ניתן לשבץ משמרת ב${block.label} ${block.emoji}`);
         }
 
         try {
@@ -106,7 +146,7 @@ export class ScheduleService {
             if (result.count === 0) {
                 throw new HttpError(404, 'משמרת לא נמצאה');
             }
-            return this.scheduleRepository.findShiftById(shiftId);
+            return this.enrichShift(await this.scheduleRepository.findShiftById(shiftId));
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
                 throw new HttpError(400, 'מתנדב לא נמצא');
@@ -119,7 +159,8 @@ export class ScheduleService {
     // note has no status/ownership guard of its own, so a plain update is enough.
     async updateShiftNote(shiftId: number, note: string | null) {
         try {
-            return await this.scheduleRepository.updateShiftNote(shiftId, note);
+            const shift = await this.scheduleRepository.updateShiftNote(shiftId, note);
+            return this.enrichShift(shift);
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
                 throw new HttpError(404, 'משמרת לא נמצאה');
