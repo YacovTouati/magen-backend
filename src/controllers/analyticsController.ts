@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { AnalyticsService } from '../services/analyticsService';
 import { buildCsv } from '../utils/csv';
+import { logError } from '../utils/logger';
 
 const analyticsService = new AnalyticsService();
 
@@ -77,8 +78,8 @@ const EXPORT_HEADERS = [
     'תיאור/תוכן',
 ];
 
-const handleError = (res: Response, error: unknown) => {
-    console.error('⛔ Analytics controller error:', error);
+const handleError = (req: Request, res: Response, error: unknown) => {
+    logError('Analytics controller error', error, { method: req.method, path: req.originalUrl });
     return res.status(500).json({ success: false, message: 'Internal server error' });
 };
 
@@ -87,7 +88,7 @@ export const getAnalyticsSummary = async (req: Request, res: Response) => {
         const summary = await analyticsService.getSummary();
         return res.status(200).json({ success: true, data: summary });
     } catch (error) {
-        return handleError(res, error);
+        return handleError(req, res, error);
     }
 };
 
@@ -98,7 +99,7 @@ export const getMonthlyAnalytics = async (req: Request, res: Response) => {
         const analytics = await analyticsService.getMonthlyIntakeAnalytics(year, month);
         return res.status(200).json({ success: true, data: analytics });
     } catch (error) {
-        return handleError(res, error);
+        return handleError(req, res, error);
     }
 };
 
@@ -128,6 +129,6 @@ export const exportMonthlyIntakes = async (req: Request, res: Response) => {
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         return res.status(200).send(csv);
     } catch (error) {
-        return handleError(res, error);
+        return handleError(req, res, error);
     }
 };

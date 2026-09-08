@@ -1,15 +1,7 @@
-import { Resend } from 'resend';
+import { logError } from '../utils/logger';
+import { resend, FROM_ADDRESS } from '../utils/resendClient';
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-// magen-app.com is now verified in Resend — sending from it instead of the
-// shared onboarding@resend.dev test domain, which was rate-limited and only
-// reliably deliverable to the account's own verified addresses. Overridable
-// via env (matching FRONTEND_URL's pattern) in case the sender ever needs to
-// change without a code deploy.
-const FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || 'noreply@magen-app.com';
-
-const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
 const wrapRtlEmail = (title: string, bodyHtml: string): string => `
 <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; background: #f9fafb; border-radius: 8px;">
@@ -98,11 +90,11 @@ export class EmailService {
         try {
             const { error } = await resend.emails.send({ from: FROM_ADDRESS, to, subject, html });
             if (error) {
-                console.error(`⛔ Resend rejected email to ${to}:`, error);
+                logError('Resend rejected email', error, { to, subject });
                 logFallback();
             }
         } catch (error) {
-            console.error(`⛔ Failed to send email to ${to} via Resend:`, error);
+            logError('Failed to send email via Resend', error, { to, subject });
             logFallback();
         }
     }

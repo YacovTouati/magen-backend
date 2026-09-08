@@ -8,6 +8,7 @@ import { EmailService } from './emailService';
 import { generateToken, hashToken } from '../utils/tokens';
 import { LoginPayload, AuthTokenPayload } from '../types/auth';
 import { RegisterPayload } from '../types/user';
+import { logWarn } from '../utils/logger';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '8h';
@@ -25,11 +26,13 @@ export class AuthService {
     async login(payload: LoginPayload) {
         const user = await this.userRepository.findByEmail(payload.email);
         if (!user) {
+            logWarn('Login failed: no account for this email', { email: payload.email });
             throw new HttpError(401, 'אימייל או סיסמה שגויים');
         }
 
         const passwordMatches = await bcrypt.compare(payload.password, user.password);
         if (!passwordMatches) {
+            logWarn('Login failed: wrong password', { email: payload.email });
             throw new HttpError(401, 'אימייל או סיסמה שגויים');
         }
 
@@ -78,6 +81,7 @@ export class AuthService {
     async forgotPassword(email: string): Promise<void> {
         const user = await this.userRepository.findByEmail(email);
         if (!user) {
+            logWarn('Forgot-password requested for an email with no account', { email });
             return;
         }
 
@@ -89,7 +93,12 @@ export class AuthService {
 
     async resetPassword(rawToken: string, newPassword: string): Promise<void> {
         const user = await this.userRepository.findByResetTokenHash(hashToken(rawToken));
-        if (!user || !user.passwordResetExpiresAt || user.passwordResetExpiresAt < new Date()) {
+        if (!user) {
+            logWarn('Password reset failed: token does not match any account (already used, or tampered/mistyped link)');
+            throw new HttpError(400, 'קישור איפוס הסיסמה אינו תקין או שפג תוקפו');
+        }
+        if (!user.passwordResetExpiresAt || user.passwordResetExpiresAt < new Date()) {
+            logWarn('Password reset failed: token expired', { email: user.email, expiresAt: user.passwordResetExpiresAt });
             throw new HttpError(400, 'קישור איפוס הסיסמה אינו תקין או שפג תוקפו');
         }
 

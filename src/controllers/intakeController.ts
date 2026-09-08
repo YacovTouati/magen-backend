@@ -1,14 +1,15 @@
 import { Request, Response } from 'express';
 import { HttpError } from '../errors/httpError';
 import { IntakeService } from '../services/intakeService';
+import { logError } from '../utils/logger';
 
 const intakeService = new IntakeService();
 
-const handleError = (res: Response, error: unknown) => {
+const handleError = (req: Request, res: Response, error: unknown) => {
     if (error instanceof HttpError) {
         return res.status(error.statusCode).json({ success: false, message: error.message });
     }
-    console.error('⛔ Intake controller error:', error);
+    logError('Intake controller error', error, { method: req.method, path: req.originalUrl });
     return res.status(500).json({ success: false, message: 'Internal server error' });
 };
 
@@ -26,7 +27,7 @@ export const getIntakes = async (req: Request, res: Response) => {
         const intakes = await intakeService.getAllIntakes();
         return res.status(200).json({ success: true, data: intakes });
     } catch (error) {
-        return handleError(res, error);
+        return handleError(req, res, error);
     }
 };
 
@@ -37,7 +38,7 @@ export const getUnhandledIntakeCount = async (req: Request, res: Response) => {
         const count = await intakeService.getUnhandledCount();
         return res.status(200).json({ success: true, data: { count } });
     } catch (error) {
-        return handleError(res, error);
+        return handleError(req, res, error);
     }
 };
 
@@ -55,7 +56,7 @@ export const createIntake = async (req: Request, res: Response) => {
         });
         return res.status(201).json({ success: true, data: intake });
     } catch (error) {
-        return handleError(res, error);
+        return handleError(req, res, error);
     }
 };
 
@@ -67,7 +68,7 @@ export const updateIntakeStatus = async (req: Request, res: Response) => {
         const intake = await intakeService.updateStatus(id, status);
         return res.status(200).json({ success: true, data: intake });
     } catch (error) {
-        return handleError(res, error);
+        return handleError(req, res, error);
     }
 };
 
@@ -78,7 +79,7 @@ export const extendIntakeExpiration = async (req: Request, res: Response) => {
         const intake = await intakeService.extendExpiration(id);
         return res.status(200).json({ success: true, data: intake });
     } catch (error) {
-        return handleError(res, error);
+        return handleError(req, res, error);
     }
 };
 
@@ -89,6 +90,6 @@ export const deleteIntake = async (req: Request, res: Response) => {
         await intakeService.hardDelete(id);
         return res.status(200).json({ success: true, message: 'Intake deleted successfully' });
     } catch (error) {
-        return handleError(res, error);
+        return handleError(req, res, error);
     }
 };

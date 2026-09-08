@@ -1,5 +1,6 @@
 import { UserRepository } from '../repositories/userRepository';
 import { EmailService } from './emailService';
+import { logError } from '../utils/logger';
 
 interface IntakeAlertData {
     id: number;
@@ -23,7 +24,7 @@ export class IntakeAlertService {
                 recipients.map((recipient) => this.emailService.sendIntakeAlertEmail(recipient.email, intake))
             );
         } catch (error) {
-            console.error(`⛔ Failed to dispatch new-intake alert emails for intake #${intake.id}:`, error);
+            logError('Failed to dispatch new-intake alert emails', error, { intakeId: intake.id });
         }
     }
 }

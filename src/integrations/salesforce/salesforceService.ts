@@ -1,6 +1,7 @@
 import jsforce from 'jsforce';
 import { loadSalesforceConfig } from './salesforceConfig';
 import { authenticateWithJwtBearer } from './salesforceAuth';
+import { logError } from '../../utils/logger';
 
 export interface SalesforceConnectionResult {
     success: boolean;
@@ -33,7 +34,7 @@ export class SalesforceService {
                 message: `מחובר בהצלחה ל-Salesforce כ-${identity.username}`,
             };
         } catch (error) {
-            console.error('⛔ Salesforce connection test failed:', error);
+            logError('Salesforce connection test failed', error);
             return {
                 success: false,
                 message: error instanceof Error ? error.message : 'חיבור ל-Salesforce נכשל מסיבה לא ידועה',

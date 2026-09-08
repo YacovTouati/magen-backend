@@ -15,4 +15,5 @@ prisma/*.db-journal
 
 # לוגים וקבצי מערכת
 *.log
+/logs
 .DS_Store

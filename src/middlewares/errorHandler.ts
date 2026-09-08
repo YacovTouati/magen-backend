@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { logError } from '../utils/logger';
 
 export const notFoundHandler = (req: Request, res: Response) => {
     res.status(404).json({ success: false, message: 'הנתיב המבוקש לא נמצא' });
@@ -16,6 +17,6 @@ export const globalErrorHandler = (err: any, req: Request, res: Response, next: 
         return res.status(400).json({ success: false, message: 'גוף הבקשה אינו JSON תקין' });
     }
 
-    console.error('⛔ Unhandled error:', err);
+    logError('Unhandled error', err, { method: req.method, path: req.originalUrl });
     return res.status(500).json({ success: false, message: 'שגיאת שרת פנימית' });
 };

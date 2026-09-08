@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { ReportService } from '../services/reportService';
+import { logError } from '../utils/logger';
 
 const reportService = new ReportService();
 
@@ -39,7 +40,7 @@ export const createCallReport = async (req: Request, res: Response) => {
         });
 
     } catch (error) {
-        console.error('⛔ שגיאה חמורה ב-Controller:', error);
+        logError('Report controller error', error, { method: req.method, path: req.originalUrl });
         return res.status(500).json({
             success: false,
             message: 'שגיאת שרת פנימית - הבקשה נחסמה מטעמי אבטחה'

@@ -1,14 +1,15 @@
 import { Request, Response } from 'express';
 import { HttpError } from '../errors/httpError';
 import { ScheduleService } from '../services/scheduleService';
+import { logError } from '../utils/logger';
 
 const scheduleService = new ScheduleService();
 
-const handleError = (res: Response, error: unknown) => {
+const handleError = (req: Request, res: Response, error: unknown) => {
     if (error instanceof HttpError) {
         return res.status(error.statusCode).json({ success: false, message: error.message });
     }
-    console.error('⛔ Schedule controller error:', error);
+    logError('Schedule controller error', error, { method: req.method, path: req.originalUrl });
     return res.status(500).json({ success: false, message: 'Internal server error' });
 };
 
@@ -36,7 +37,7 @@ export const createSchedule = async (req: Request, res: Response) => {
         const result = await scheduleService.createSchedule(Number(month), Number(year));
         return res.status(201).json({ success: true, data: result });
     } catch (error) {
-        return handleError(res, error);
+        return handleError(req, res, error);
     }
 };
 
@@ -47,7 +48,7 @@ export const getScheduleByMonthYear = async (req: Request, res: Response) => {
         const schedule = await scheduleService.getScheduleByMonthYear(month, year);
         return res.status(200).json({ success: true, data: schedule });
     } catch (error) {
-        return handleError(res, error);
+        return handleError(req, res, error);
     }
 };
 
@@ -58,7 +59,7 @@ export const getScheduleShifts = async (req: Request, res: Response) => {
         const schedule = await scheduleService.getScheduleWithShifts(id);
         return res.status(200).json({ success: true, data: schedule });
     } catch (error) {
-        return handleError(res, error);
+        return handleError(req, res, error);
     }
 };
 
@@ -69,7 +70,7 @@ export const publishSchedule = async (req: Request, res: Response) => {
         const schedule = await scheduleService.publish(id);
         return res.status(200).json({ success: true, data: schedule });
     } catch (error) {
-        return handleError(res, error);
+        return handleError(req, res, error);
     }
 };
 
@@ -80,7 +81,7 @@ export const claimShift = async (req: Request, res: Response) => {
         const shift = await scheduleService.claimShift(id, req.user!.id);
         return res.status(200).json({ success: true, data: shift });
     } catch (error) {
-        return handleError(res, error);
+        return handleError(req, res, error);
     }
 };
 
@@ -91,7 +92,7 @@ export const adminReleaseShift = async (req: Request, res: Response) => {
         const shift = await scheduleService.adminRelease(id);
         return res.status(200).json({ success: true, data: shift });
     } catch (error) {
-        return handleError(res, error);
+        return handleError(req, res, error);
     }
 };
 
@@ -103,7 +104,7 @@ export const adminAssignShift = async (req: Request, res: Response) => {
         const shift = await scheduleService.adminAssign(id, Number(volunteerId));
         return res.status(200).json({ success: true, data: shift });
     } catch (error) {
-        return handleError(res, error);
+        return handleError(req, res, error);
     }
 };
 
@@ -115,7 +116,7 @@ export const updateShiftNote = async (req: Request, res: Response) => {
         const shift = await scheduleService.updateShiftNote(id, note);
         return res.status(200).json({ success: true, data: shift });
     } catch (error) {
-        return handleError(res, error);
+        return handleError(req, res, error);
     }
 };
 
@@ -126,6 +127,6 @@ export const deleteShiftNote = async (req: Request, res: Response) => {
         const shift = await scheduleService.updateShiftNote(id, null);
         return res.status(200).json({ success: true, data: shift });
     } catch (error) {
-        return handleError(res, error);
+        return handleError(req, res, error);
     }
 };

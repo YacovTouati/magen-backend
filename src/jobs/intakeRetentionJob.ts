@@ -1,5 +1,6 @@
 import cron from 'node-cron';
 import { IntakeService } from '../services/intakeService';
+import { logError } from '../utils/logger';
 
 const intakeService = new IntakeService();
 
@@ -27,7 +28,7 @@ export const startIntakeRetentionJob = () => {
                 console.log(`🗑️  Intake retention job: permanently deleted ${count} expired intake(s).`);
             }
         } catch (error) {
-            console.error('⛔ Intake retention job failed:', error);
+            logError('Intake retention job failed', error);
         } finally {
             isExecuting = false;
         }
