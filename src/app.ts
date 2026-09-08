@@ -10,10 +10,8 @@ import { scheduleRouter } from './routes/scheduleRoutes';
 import { userRouter } from './routes/userRoutes';
 import { generalApiLimiter } from './middlewares/rateLimiters';
 import { globalErrorHandler, notFoundHandler } from './middlewares/errorHandler';
-import { startIntakeRetentionJob } from './jobs/intakeRetentionJob';
 
 const app: Application = express();
-const PORT = process.env.PORT || 3000;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:4200';
 
 // 🛡️ שכבת אבטחה גלובלית
@@ -48,7 +46,7 @@ app.use(notFoundHandler);
 // רשת ביטחון אחרונה לכל שגיאה שלא נתפסה קודם — חייבת להיות אחרונה
 app.use(globalErrorHandler);
 
-app.listen(PORT, () => {
-    console.log(`⚡ [Magen Backend]: השרת רץ בצורה מאובטחת על http://localhost:${PORT}`);
-    startIntakeRetentionJob();
-});
+// Exported (not started here) so tests can drive it directly via supertest
+// without opening a real port or scheduling the retention cron job — see server.ts,
+// the actual process entrypoint, for both of those.
+export default app;
