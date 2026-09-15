@@ -47,6 +47,18 @@ describe('Auth', () => {
             expect(res.body.message).toBe('אימייל או סיסמה שגויים');
         });
 
+        it('logs in successfully when the email casing/whitespace differs from how the account was created', async () => {
+            const testUser = await createTestUser('VOLUNTEER');
+            userIds.push(testUser.id);
+
+            const res = await request(app)
+                .post('/api/auth/login')
+                .send({ email: `  ${testUser.email.toUpperCase()}  `, password: DEFAULT_TEST_PASSWORD });
+
+            expect(res.status).toBe(200);
+            expect(res.body.data.user.email).toBe(testUser.email);
+        });
+
         it('rejects an email with no account using the exact same message as a wrong password', async () => {
             const res = await request(app)
                 .post('/api/auth/login')

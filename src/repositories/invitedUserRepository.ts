@@ -1,5 +1,6 @@
 import prisma from '../db/prisma';
 import { UserRole } from '../types/user';
+import { normalizeEmail } from '../utils/email';
 
 interface UpsertInviteData {
     email: string;
@@ -28,16 +29,17 @@ const registeredUserSelect = {
 
 export class InvitedUserRepository {
     async findByEmail(email: string) {
-        return prisma.invitedUser.findUnique({ where: { email } });
+        return prisma.invitedUser.findUnique({ where: { email: normalizeEmail(email) } });
     }
 
     // Re-inviting an email with no prior row, or a still-pending one, both
     // land here — the service layer is the one that refuses to touch an
     // already-used row (that email belongs to a real registered user now).
     async upsertPendingInvite(data: UpsertInviteData) {
+        const email = normalizeEmail(data.email);
         return prisma.invitedUser.upsert({
-            where: { email: data.email },
-            create: data,
+            where: { email },
+            create: { ...data, email },
             update: {
                 role: data.role,
                 tokenHash: data.tokenHash,
@@ -54,7 +56,7 @@ export class InvitedUserRepository {
     async consumeInviteAndCreateUser(inviteId: number, userData: RegisteredUserData) {
         return prisma.$transaction(async (tx) => {
             const user = await tx.user.create({
-                data: userData,
+                data: { ...userData, email: normalizeEmail(userData.email) },
                 select: registeredUserSelect,
             });
             await tx.invitedUser.update({

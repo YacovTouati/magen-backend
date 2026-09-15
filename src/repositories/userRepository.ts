@@ -1,5 +1,6 @@
 import prisma from '../db/prisma';
 import { CreateRegisteredUserPayload, UserRole } from '../types/user';
+import { normalizeEmail } from '../utils/email';
 
 const publicUserSelect = {
     id: true,
@@ -17,7 +18,7 @@ export class UserRepository {
     }
 
     async findByEmail(email: string) {
-        return prisma.user.findUnique({ where: { email } });
+        return prisma.user.findUnique({ where: { email: normalizeEmail(email) } });
     }
 
     async findById(id: number) {
@@ -35,7 +36,7 @@ export class UserRepository {
     // verified — never called with an admin-supplied password.
     async createRegisteredUser(payload: CreateRegisteredUserPayload) {
         return prisma.user.create({
-            data: payload,
+            data: { ...payload, email: normalizeEmail(payload.email) },
             select: publicUserSelect,
         });
     }
@@ -60,7 +61,7 @@ export class UserRepository {
     async updateDetails(id: number, data: Partial<{ name: string; email: string; role: UserRole }>) {
         return prisma.user.update({
             where: { id },
-            data,
+            data: data.email ? { ...data, email: normalizeEmail(data.email) } : data,
             select: publicUserSelect,
         });
     }
