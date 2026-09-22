@@ -36,7 +36,7 @@ export const validateCallReport = [
 
   body('summaryNotes')
     .trim()
-    .isLength({ min: 5, max: 5000 }).withMessage('סיכום השיחה חייב להכיל בין 5 ל-5000 תווים'),
+    .isLength({ min: 5, max: 10000 }).withMessage('סיכום השיחה חייב להכיל בין 5 ל-10000 תווים'),
 
   // 🔥 שדות חדשים שהתווספו לדרישת הארגון:
   body('callerName')
